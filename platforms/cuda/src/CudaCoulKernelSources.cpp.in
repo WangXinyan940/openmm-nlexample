@@ -1,0 +1,4 @@
+#include "CudaCosAccKernelSources.h"
+
+using namespace CosAccPlugin;
+using namespace std;
