@@ -36,16 +36,10 @@ public:
     double execute(OpenMM::ContextImpl& context, bool includeForces, bool includeEnergy);
 private:
     bool hasInitializedKernel;
-    OpenMM::CudaArray charges_cu;
-    OpenMM::CudaArray exclusions_cu;
-    OpenMM::CudaArray cosSinSums;
     OpenMM::CudaContext& cu;
-    CUfunction calcNoPBCEnForcesKernel;
-    CUfunction calcNoPBCExclusionsKernel;
-    CUfunction calcEwaldRecKernel;
-    CUfunction calcEwaldRealKernel;
-    CUfunction calcEwaldExclusionsKernel;
-    double ewaldSelfEnergy;
+    CUfunction calcTestForcePBCKernel;
+    CUfunction calcTestForceNoPBCKernel;
+    OpenMM::CudaArray pairidx0, pairidx1;
     double cutoff;
     bool ifPBC;
 };

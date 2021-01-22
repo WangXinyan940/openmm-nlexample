@@ -44,26 +44,46 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     double dEdR;
     vector<double> deltaR;
     deltaR.resize(5);
-    computeNeighborListVoxelHash(*neighborList, numParticles, pos, vector<set<int>>, box, ifPBC, cutoff, 0.0);
-    for(auto& pair : *neighborList){
-        int ii = pair.first;
-        int jj = pair.second;
+    if (ifPBC){
+        computeNeighborListVoxelHash(*neighborList, numParticles, pos, vector<set<int>>, box, ifPBC, cutoff, 0.0);
+        for(auto& pair : *neighborList){
+            int ii = pair.first;
+            int jj = pair.second;
 
-        double deltaR[2][ReferenceForce::LastDeltaRIndex];
-        ReferenceForce::getDeltaRPeriodic(atomCoordinates[jj], atomCoordinates[ii], periodicBoxVectors, deltaR[0]);
-        double r         = deltaR[0][ReferenceForce::RIndex];
-        double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
+            double deltaR[2][ReferenceForce::LastDeltaRIndex];
+            ReferenceForce::getDeltaRPeriodic(atomCoordinates[jj], atomCoordinates[ii], periodicBoxVectors, deltaR[0]);
+            double r         = deltaR[0][ReferenceForce::RIndex];
+            double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
-        if(includeForces){
-            double dEdR = - 200.0 * inverseR * inverseR * inverseR;
-            for(int kk=0;kk<3;kk++){
-                double fconst = dEdR*deltaR[0][kk];
-                forces[ii][kk] -= fconst;
-                forces[jj][kk] += fconst;
+            if(includeForces){
+                double dEdR = - 200.0 * inverseR * inverseR * inverseR;
+                for(int kk=0;kk<3;kk++){
+                    double fconst = dEdR*deltaR[0][kk];
+                    forces[ii][kk] -= fconst;
+                    forces[jj][kk] += fconst;
+                }
+            }
+            energy += 100. * inverseR * inverseR;
+        }
+    } else {
+        for (int ii=0; ii<numParticles; ii++){
+            for (int jj=ii+1;jj<numParticles; jj++){
+                double deltaR[2][ReferenceForce::LastDeltaRIndex];
+                ReferenceForce::getDeltaR(atomCoordinates[ii], atomCoordinates[jj], deltaR[0]);
+                double r         = deltaR[0][ReferenceForce::RIndex];
+                double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
+
+                if(includeForces){
+                    double dEdRdR = - 200.0 * inverseR * inverseR * inverseR * inverseR;
+                    for(int kk=0;kk<3;kk++){
+                        double fconst = dEdRdR*deltaR[0][kk];
+                        forces[ii][kk] -= fconst;
+                        forces[jj][kk] += fconst;
+                    }
+                }
+                energy += 100. * inverseR * inverseR;
             }
         }
-
-        energy += 100. * inverseR * inverseR;
     }
     return energy;
 }

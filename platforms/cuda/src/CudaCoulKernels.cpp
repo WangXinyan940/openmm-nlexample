@@ -17,70 +17,10 @@ void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccFor
     int numParticles = system.getNumParticles();
     int elementSize = cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float);
 
-    charges_cu.initialize(cu, cu.getPaddedNumAtoms(), cu.getUseDoublePrecision() ? sizeof(double) : sizeof(float), "charges");
-    if (cu.getUseDoublePrecision()){
-        vector<double> charges;
-        charges.resize(numParticles);
-        for(int i=0;i<numParticles;i++){
-            charges[i] = force.getParticleCharge(i);
-        }
-        charges_cu.upload(charges);
-    } else {
-        vector<float> charges;
-        charges.resize(cu.getPaddedNumAtoms());
-        for(int i=0;i<numParticles;i++){
-            charges[i] = force.getParticleCharge(i);
-        }
-        charges_cu.upload(charges);
-    }
-
-    vector<int> exclusions;
-    exclusions.resize(2*force.getNumExceptions());
-    for(int i=0;i<force.getNumExceptions();i++){
-        int p1, p2;
-        force.getExceptionParameters(i, p1, p2);
-        exclusions.push_back(p1);
-        exclusions.push_back(p2);
-    }
-    exclusions_cu.initialize(cu, 2*force.getNumExceptions(), sizeof(int), "exclusions");
-
     ifPBC = force.usesPeriodicBoundaryConditions();
-    if (ifPBC){
-        cutoff = force.getCutoffDistance();
-        ewaldTol = force.getEwaldErrorTolerance();
-        Vec3 boxVectors[3];
-        system.getDefaultPeriodicBoxVectors(boxVectors[0], boxVectors[1], boxVectors[2]);
-        alpha = (1.0/cutoff)*sqrt(-log(2.0*ewaldTol));
-        one_alpha2 = 1.0 / alpha / alpha;
-        kmaxx = 0;
-        while (getEwaldParamValue(kmaxx, boxVectors[0][0], alpha) > ewaldTol){
-            kmaxx += 1;
-        }
-        kmaxy = 0;
-        while (getEwaldParamValue(kmaxy, boxVectors[1][1], alpha) > ewaldTol){
-            kmaxy += 1;
-        }
-        kmaxz = 0;
-        while (getEwaldParamValue(kmaxz, boxVectors[2][2], alpha) > ewaldTol){
-            kmaxz += 1;
-        }
-        if (kmaxx%2 == 0)
-            kmaxx += 1;
-        if (kmaxy%2 == 0)
-            kmaxy += 1;
-        if (kmaxz%2 == 0)
-            kmaxz += 1;
-
-        // self energy
-        ewaldSelfEnergy = 0.0;
-        for(int ii=0;ii<numParticles;ii++){
-            ewaldSelfEnergy -= ONE_4PI_EPS0 * charges[ii] * charges[ii] * alpha / SQRT_PI;
-        }
-    }
+    cutoff = force.getCutoffDistance();
 
     // Inititalize CUDA objects.
-    
-
     //Vec3 boxVectors[3];
     //map<string, string> defines;
     //system.getDefaultPeriodicBoxVectors(boxVectors[0], boxVectors[1], boxVectors[2]);
@@ -92,18 +32,28 @@ void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccFor
     if (!ifPBC){
         map<string, string> defines;
         CUmoudle module = cu.createModule(CudaCoulKernelSources::noPBCForce, defines);
-        calcNoPBCEnForcesKernel = cu.getKernel(module, "calcNoPBCEnForces");
-        calcNoPBCExclusionsKernel = cu.getKernel(module, "calcNoPBCExclusions");
+        calcTestForceNoPBCKernel = cu.getKernel(module, "calcTestForceNoPBC");
+        vector<int> idx0;
+        vector<int> idx1;
+        idx0.resize(numParticles*(numParticles-1)/2);
+        idx1.resize(numParticles*(numParticles-1)/2);
+        int count = 0;
+        for(int ii=0;ii<numParticles;ii++){
+            for(int jj=ii+1;jj<numParticles;jj++){
+                idx0[count] = ii;
+                idx1[count] = jj;
+                count += 1;
+            }
+        }
+        pairidx0.initialize(cu, numParticles*(numParticles-1)/2, sizeof(int), "index0");
+        pairidx1.initialize(cu, numParticles*(numParticles-1)/2, sizeof(int), "index1");
+        pairidx0.upload(idx0);
+        pairidx1.upload(idx1);
     } else {
-        map<string, string> ewaldDefines;
-        map<string, string> shortDefines;
-        // macro for ewald
-        CUmoudle ewaldModule = cu.createModule(CudaCoulKernelSources::ewaldForce, ewaldDefines);
-        calcEwaldRecKernel = cu.getKernel(ewaldModule, "calcEwaldRec");
+        map<string, string> pbcDefines;
         // macro for short-range
-        CUmodule shortModule = cu.createModule(CudaCoulKernelSources::shortForce, shortDefines);
-        calcEwaldRealKernel = cu.getKernel(shortModule, "calcEwaldReal");
-        calcEwaldExclusionsKernel = cu.getKernel(shortModule, "calcEwaldExclusions");
+        CUmodule PBCModule = cu.createModule(CudaCoulKernelSources::PBCForce, pbcDefines);
+        calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
     }
     hasInitializedKernel = true;
 }
@@ -111,22 +61,15 @@ void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccFor
 double CudaCalcCosAccForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     
     int numParticles = cu.getNumAtoms();
-
+    double energy = 0.0;
     if (ifPBC){
-        double energy = ewaldSelfEnergy;
+        int paddedNumAtoms = cu.getPaddedNumAtoms();
+        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
+        cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
-        double energy = 0.0;
         int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&charges_cu.getDevicePointer(), &cu.getPosQ().getDevicePointer(), &cu.getForce().getDevicePointer(), &numParticles, &paddedNumAtoms}
-        cu.executeKernel(calcNoPBCEnForcesKernel, args, numParticles*(numParticles-1)/2);
-    }
-    if (includeEnergy) {
-        energy += 1.0;
-    }
-    if (includeForces) {
-        int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&massvec_cu.getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), &accelerate, &numParticles, &paddedNumAtoms};
-        cu.executeKernel(addForcesKernel, args, numParticles);
+        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosQ().getDevicePointer(), &cu.getForce().getDevicePointer(), cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms}
+        cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
     }
     return energy;
 }
