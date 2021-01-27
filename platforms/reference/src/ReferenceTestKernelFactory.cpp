@@ -1,11 +1,11 @@
-#include "ReferenceCoulKernelFactory.h"
-#include "ReferenceCoulKernels.h"
+#include "ReferenceTestKernelFactory.h"
+#include "ReferenceTestKernels.h"
 #include "openmm/reference/ReferencePlatform.h"
 #include "openmm/internal/ContextImpl.h"
 #include "openmm/OpenMMException.h"
 #include <vector>
 
-using namespace CoulPlugin;
+using namespace TestPlugin;
 using namespace OpenMM;
 using namespace std;
 
@@ -18,19 +18,19 @@ extern "C" OPENMM_EXPORT void registerKernelFactories() {
     for (int i = 0; i < Platform::getNumPlatforms(); i++) {
         Platform& platform = Platform::getPlatform(i);
         if (dynamic_cast<ReferencePlatform*>(&platform) != NULL) {
-            ReferenceCoulKernelFactory* factory = new ReferenceCoulKernelFactory();
-            platform.registerKernelFactory(CalcCoulForceKernel::Name(), factory);
+            ReferenceTestKernelFactory* factory = new ReferenceTestKernelFactory();
+            platform.registerKernelFactory(CalcTestForceKernel::Name(), factory);
         }
     }
 }
 
-extern "C" OPENMM_EXPORT void registerCoulReferenceKernelFactories() {
+extern "C" OPENMM_EXPORT void registerTestReferenceKernelFactories() {
     registerKernelFactories();
 }
 
-KernelImpl* ReferenceCoulKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
+KernelImpl* ReferenceTestKernelFactory::createKernelImpl(std::string name, const Platform& platform, ContextImpl& context) const {
     ReferencePlatform::PlatformData& data = *static_cast<ReferencePlatform::PlatformData*>(context.getPlatformData());
-    if (name == CalcCoulForceKernel::Name())
-        return new ReferenceCalcCoulForceKernel(name, platform);
+    if (name == CalcTestForceKernel::Name())
+        return new ReferenceCalcTestForceKernel(name, platform);
     throw OpenMMException((std::string("Tried to create kernel with illegal kernel name '")+name+"'").c_str());
 }

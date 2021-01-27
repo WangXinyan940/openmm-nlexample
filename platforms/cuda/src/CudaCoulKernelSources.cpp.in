@@ -1,4 +1,4 @@
-#include "CudaCosAccKernelSources.h"
+#include "CudaTestKernelSources.h"
 
-using namespace CosAccPlugin;
+using namespace TestPlugin;
 using namespace std;

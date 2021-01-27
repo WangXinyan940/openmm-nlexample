@@ -1,17 +1,17 @@
-#include "CudaCosAccKernels.h"
-#include "CudaCosAccKernelSources.h"
+#include "CudaTestKernels.h"
+#include "CudaTestKernelSources.h"
 #include "openmm/internal/ContextImpl.h"
 #include <map>
 #include <iostream>
 
-using namespace CosAccPlugin;
+using namespace TestPlugin;
 using namespace OpenMM;
 using namespace std;
 
-CudaCalcCosAccForceKernel::~CudaCalcCosAccForceKernel() {
+CudaCalcTestForceKernel::~CudaCalcTestForceKernel() {
 }
 
-void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccForce& force) {
+void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& force) {
     cu.setAsCurrent();
 
     int numParticles = system.getNumParticles();
@@ -21,14 +21,16 @@ void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccFor
     cutoff = force.getCutoffDistance();
 
     // Inititalize CUDA objects.
-    //Vec3 boxVectors[3];
-    //map<string, string> defines;
-    //system.getDefaultPeriodicBoxVectors(boxVectors[0], boxVectors[1], boxVectors[2]);
-    //defines["TWOPIOVERLZ"] = cu.doubleToString(6.283185307179586/boxVectors[2][2]);
-    //cout << "TWOPIOVERLZ: " << defines["TWOPIOVERLZ"] << endl;
-    //CUmodule module = cu.createModule(CudaCosAccKernelSources::cosAccForce, defines);
-    //addForcesKernel = cu.getKernel(module, "addForces");
     // if noPBC
+    set<pair<int, int>> tilesWithExclusions;
+    // for (int atom1 = 0; atom1 < (int) exclusions.size(); ++atom1) {
+    //     int x = atom1/CudaContext::TileSize;
+    //     for (int atom2 : exclusions[atom1]) {
+    //         int y = atom2/CudaContext::TileSize;
+    //         tilesWithExclusions.insert(make_pair(max(x, y), min(x, y)));
+    //     }
+    // }
+
     if (!ifPBC){
         map<string, string> defines;
         CUmoudle module = cu.createModule(CudaCoulKernelSources::noPBCForce, defines);
@@ -51,24 +53,46 @@ void CudaCalcCosAccForceKernel::initialize(const System& system, const CosAccFor
         pairidx1.upload(idx1);
     } else {
         map<string, string> pbcDefines;
+        pbcDefines["NUM_ATOMS"] = cu.intToString(numMultipoles);
+        pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
+        pbcDefines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
+
+        pbcDefines["TILE_SIZE"] = cu.intToString(CudaContext::TileSize);
+        int numExclusionTiles = tilesWithExclusions.size();
+        pbcDefines["NUM_TILES_WITH_EXCLUSIONS"] = cu.intToString(numExclusionTiles);
+        int numContexts = cu.getPlatformData().contexts.size();
+        int startExclusionIndex = cu.getContextIndex()*numExclusionTiles/numContexts;
+        int endExclusionIndex = (cu.getContextIndex()+1)*numExclusionTiles/numContexts;
+        pbcDefines["FIRST_EXCLUSION_TILE"] = cu.intToString(startExclusionIndex);
+        pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
+
         // macro for short-range
         CUmodule PBCModule = cu.createModule(CudaCoulKernelSources::PBCForce, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
+
+        vector<vector<int>> exclusions;
+        cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
+
     hasInitializedKernel = true;
 }
 
-double CudaCalcCosAccForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
-    
+double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
+
     int numParticles = cu.getNumAtoms();
     double energy = 0.0;
     if (ifPBC){
         int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
+        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
+            &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
+            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(),
+            cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
+            cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms}
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosQ().getDevicePointer(), &cu.getForce().getDevicePointer(), cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms}
+        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosQ().getDevicePointer(), &cu.getForce().getDevicePointer(), 
+            &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
     }
     return energy;
