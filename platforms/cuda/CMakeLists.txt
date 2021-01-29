@@ -7,7 +7,7 @@
 
 SET(NLTEST_CUDA_LIBRARY_NAME OpenMMTestCUDA)
 
-SET(SHARED_TARGET ${TEST_CUDA_LIBRARY_NAME})
+SET(SHARED_TARGET ${NLTEST_CUDA_LIBRARY_NAME})
 
 
 # These are all the places to search for header files which are
