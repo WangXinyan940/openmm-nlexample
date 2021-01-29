@@ -47,7 +47,7 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     if (ifPBC){
         cout << "Before NL|" << endl;
         cout << atomCoordinates.size() << " " << exclusions.size() << " " << ifPBC << " " << cutoff << endl;
-        computeNeighborListVoxelHash(&neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
+        computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
         cout << "Finish NL" << endl;
         for(auto& pair : *neighborList){
             int ii = pair.first;
