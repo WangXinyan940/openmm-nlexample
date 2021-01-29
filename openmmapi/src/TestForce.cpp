@@ -22,7 +22,7 @@ void TestForce::setCutoffDistance(double cutoff){
     cutoffDistance = cutoff;
 }
 
-bool TestForce::usesPeriodicBoundaryConditions() {
+bool TestForce::usesPeriodicBoundaryConditions() const {
     return ifPBC;
 }
 
