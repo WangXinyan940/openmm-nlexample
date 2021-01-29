@@ -63,7 +63,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
         pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
         pbcDefines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
-        defines["THREAD_BLOCK_SIZE"] = cu.intToString(cu.getNonbondedUtilities().getForceThreadBlockSize());
+        pbcDefines["THREAD_BLOCK_SIZE"] = cu.intToString(cu.getNonbondedUtilities().getForceThreadBlockSize());
 
         pbcDefines["TILE_SIZE"] = cu.intToString(CudaContext::TileSize);
         int numExclusionTiles = tilesWithExclusions.size();
