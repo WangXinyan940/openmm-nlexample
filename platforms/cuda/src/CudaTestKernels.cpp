@@ -37,6 +37,21 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
     //         tilesWithExclusions.insert(make_pair(max(x, y), min(x, y)));
     //     }
     // }
+    if (cu.getUseDoublePrecision()){
+        vector<double> parameters;
+        for(int ii=0;ii<force.getNumParticles();ii++){
+            parameters.push_back(force.getParticleParameter(ii));
+        }
+        params.initialize(cu, force.getNumParticles(), elementSize, "params");
+        params.upload(parameters);
+    } else {
+        vector<float> parameters;
+        for(int ii=0;ii<force.getNumParticles();ii++){
+            parameters.push_back(force.getParticleParameter(ii));
+        }
+        params.initialize(cu, force.getNumParticles(), elementSize, "params");
+        params.upload(parameters);
+    }
 
     if (!ifPBC){
         map<string, string> defines;
@@ -82,7 +97,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         exclusions.resize(0);
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
-
+    cu.addForce(new CudaTestFForceInfo(force));
     hasInitializedKernel = true;
 }
 
@@ -97,6 +112,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         int numTileIndices = nb.getNumTiles();
         unsigned int maxTiles = nb.getInteractingTiles().getSize();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
+            &params.getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(),
             &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
             &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(), &maxTiles,
             cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
@@ -105,8 +121,36 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
+            &params.getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(),
             &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
     }
     return energy;
 }
+
+class CudaTestFForceInfo: public CudaForceInfo {
+public:
+	CudaTestFForceInfo(const TestForce& force) :
+			force(force) {
+	}
+    bool areParticlesIdentical(int particle1, int particle2) {
+        double p1, p2;
+        p1 = force.getParticleParameter(particle1);
+        p2 = force.getParticleParameter(particle2);
+        return (p1 == p2);
+    }
+	int getNumParticleGroups() {
+		return force.getNumParticles();
+	}
+	void getParticlesInGroup(int index, vector<int>& particles) {
+		particles.resize(1);
+        particles[0] = index;
+	}
+	bool areGroupsIdentical(int group1, int group2) {
+		double p1 = force.getParticleParameter(group1);
+        double p2 = force.getParticleParameter(group2);
+		return (p1 == p2);
+	}
+private:
+	const TestForce& force;
+};

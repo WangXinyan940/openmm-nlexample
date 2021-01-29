@@ -2,11 +2,13 @@
 
 typedef struct {
     real3 pos, force;
+    real param;
 } AtomData;
 
-inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __restrict__ posq) {
+inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __restrict__ posq, real prm) {
     real4 atomPosq = posq[atom];
     data.pos = make_real3(atomPosq.x, atomPosq.y, atomPosq.z);
+    param = prm;
 }
 
 __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
@@ -17,9 +19,9 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
         real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
         real rInv = RSQRT(r2);
         // real r = r2*rInv;
-
-        energy += 100.0 * rInv * rInv;
-        mixed dEdRdR = - 200.0 * rInv * rInv * rInv * rInv;
+        real p1p2 = atom1.param * atom2.param;
+        energy += p1p2 * rInv * rInv;
+        mixed dEdRdR = - 2 * p1p2 * rInv * rInv * rInv * rInv;
         atom1.force.x += dEdRdR * delta.x;
         atom1.force.y += dEdRdR * delta.y;
         atom1.force.z += dEdRdR * delta.z;
@@ -33,6 +35,8 @@ extern "C" __global__ void calcTestForcePBC(
     mixed*              __restrict__     energyBuffer,
     real4*              __restrict__     posq,
     unsigned long long* __restrict__     forceBuffers,
+    real*               __restrict__     params,
+    int*                __restrict__     atomIndex,
     const int2*         __restrict__     exclusionTiles, 
     unsigned int                         startTileIndex, 
     unsigned int                         numTileIndices,
@@ -66,7 +70,7 @@ extern "C" __global__ void calcTestForcePBC(
         AtomData data;
         unsigned int atom1 = x*TILE_SIZE + tgx;
         // !!!!! Here load atom data of atom1 !!!!!
-        loadAtomData(data, atom1, posq);
+        loadAtomData(data, atom1, posq, params[atomIndex[atom1]]);
         data.force = make_real3(0);
         if (x == y) {
             // This tile is on the diagonal.
@@ -89,7 +93,7 @@ extern "C" __global__ void calcTestForcePBC(
             // This is an off-diagonal tile.
 
             unsigned int j = y*TILE_SIZE + tgx;
-            loadAtomData(localData[threadIdx.x], j, posq);
+            loadAtomData(localData[threadIdx.x], j, posq, params[atomIndex[j]]);
             localData[threadIdx.x].force = make_real3(0);
             unsigned int tj = tgx;
             for (j = 0; j < TILE_SIZE; j++) {
@@ -135,11 +139,11 @@ extern "C" __global__ void calcTestForcePBC(
             // Load atom data for this tile.
 
             AtomData data;
-            loadAtomData(data, atom1, posq);
+            loadAtomData(data, atom1, posq, params[atomIndex[atom1]]);
             data.force = make_real3(0);
             unsigned int j = interactingAtoms[pos*TILE_SIZE+tgx];
             atomIndices[threadIdx.x] = j;
-            loadAtomData(localData[threadIdx.x], j, posq);
+            loadAtomData(localData[threadIdx.x], j, posq, params[atomIndex[j]]);
             localData[threadIdx.x].force = make_real3(0);
 
             // Compute forces.

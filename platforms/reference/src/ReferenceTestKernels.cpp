@@ -36,6 +36,9 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
     if (ifPBC) {
         neighborList = new NeighborList();
     }
+    for(int ii=0;ii<force.getNumParticles();ii++){
+        params.push_back(force.getParticleParameter(ii));
+    }
 }
 
 double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
@@ -52,38 +55,40 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
         for(auto& pair : *neighborList){
             int ii = pair.first;
             int jj = pair.second;
+            double p1p2 = params[ii] * params[jj];
             double deltaR[2][ReferenceForce::LastDeltaRIndex];
             ReferenceForce::getDeltaRPeriodic(atomCoordinates[ii], atomCoordinates[jj], periodicBoxVectors, deltaR[0]);
             double r         = deltaR[0][ReferenceForce::RIndex];
             double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
             if(includeForces){
-                double dEdRdR = - 200.0 * inverseR * inverseR * inverseR * inverseR;
+                double dEdRdR = - p1p2 * 2 * inverseR * inverseR * inverseR * inverseR;
                 for(int kk=0;kk<3;kk++){
                     double fconst = dEdRdR*deltaR[0][kk];
                     forces[ii][kk] += fconst;
                     forces[jj][kk] -= fconst;
                 }
             }
-            energy += 100. * inverseR * inverseR;
+            energy += p1p2 * inverseR * inverseR;
         }
     } else {
         for (int ii=0; ii<numParticles; ii++){
             for (int jj=ii+1;jj<numParticles; jj++){
+                double p1p2 = params[ii] * params[jj];
                 double deltaR[2][ReferenceForce::LastDeltaRIndex];
                 ReferenceForce::getDeltaR(atomCoordinates[ii], atomCoordinates[jj], deltaR[0]);
                 double r         = deltaR[0][ReferenceForce::RIndex];
                 double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
                 if(includeForces){
-                    double dEdRdR = - 200.0 * inverseR * inverseR * inverseR * inverseR;
+                    double dEdRdR = - 2 * p1p2 * inverseR * inverseR * inverseR * inverseR;
                     for(int kk=0;kk<3;kk++){
                         double fconst = dEdRdR*deltaR[0][kk];
                         forces[ii][kk] += fconst;
                         forces[jj][kk] -= fconst;
                     }
                 }
-                energy += 100. * inverseR * inverseR;
+                energy += p1p2 * inverseR * inverseR;
             }
         }
     }

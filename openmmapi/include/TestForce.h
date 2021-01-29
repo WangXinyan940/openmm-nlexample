@@ -17,9 +17,31 @@ class TestForce : public OpenMM::Force {
 public:
     /**
      * Create a TestForce like:
-     *          U = 100 / r^2
+     *          U = p1 * p2 / r^2
      */
     TestForce();
+    /**
+     * Add particle
+     * @param factor     pre-factor
+     */
+    void addParticle(double factor);
+    /**
+     * Get num of particles
+     * @return           num
+     */
+    int getNumParticles();
+    /**
+     * Set particle parameter
+     * @param index      index
+     * @param factor     factor
+     */
+    void setParticleParameter(int index, double factor);
+    /**
+     * Get particle parameter
+     * @param index      index
+     * @return           factor
+     */
+    double getParticleParameter(int index);
     /**
      * Get Cutoff Distance
      * @return            cutoff
@@ -46,6 +68,7 @@ protected:
 private:
     double cutoffDistance;
     bool ifPBC;
+    std::vector<double> params;
 };
 
 } // namespace TestPlugin

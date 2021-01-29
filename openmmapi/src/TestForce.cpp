@@ -13,6 +13,21 @@ TestForce::TestForce() {
     ifPBC = false;
 }
 
+void TestForce::addParticle(double factor){
+    params.push_back(factor);
+}
+
+int TestForce::getNumParticles(){
+    return params.size();
+}
+
+void TestForce::setParticleParameter(int index, double factor){
+    params[index] = factor;
+}
+
+double TestForce::getParticleParameter(int index){
+    return params[index];
+}
 
 double TestForce::getCutoffDistance() const {
     return cutoffDistance;

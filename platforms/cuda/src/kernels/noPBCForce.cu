@@ -2,6 +2,8 @@ extern "C" __global__ void calcTestForceNoPBC(
     mixed*              __restrict__     energyBuffer,
     real4*              __restrict__     posq,
     unsigned long long* __restrict__     forceBuffers,
+    real*               __restrict__     params,
+    int*                __restrict__     atomIndex,
     int*                __restrict__     pairidx0,
     int*                __restrict__     pairidx1,
     int                                  numParticles,
@@ -13,8 +15,9 @@ extern "C" __global__ void calcTestForceNoPBC(
         real3 delta = make_real3(posq[jj].x-posq[ii].x,posq[jj].y-posq[ii].y,posq[jj].z-posq[ii].z);
         real R2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         real inverseR = RSQRT(R2);
-        energyBuffer[npair] += 100.0 * inverseR * inverseR;
-        real dEdRdR = - 200.0 * inverseR * inverseR * inverseR * inverseR;
+        real p1p2 = params[atomIndex[ii]] * params[atomIndex[jj]];
+        energyBuffer[npair] += p1p2 * inverseR * inverseR;
+        real dEdRdR = - 2 * p1p2 * inverseR * inverseR * inverseR * inverseR;
         real3 force = dEdRdR * delta;
         atomicAdd(&forceBuffers[ii], static_cast<unsigned long long>((long long) (force.x*0x100000000)));
         atomicAdd(&forceBuffers[ii+paddedNumAtoms], static_cast<unsigned long long>((long long) (force.y*0x100000000)));

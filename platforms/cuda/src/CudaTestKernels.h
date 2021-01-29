@@ -40,6 +40,7 @@ private:
     CUfunction calcTestForcePBCKernel;
     CUfunction calcTestForceNoPBCKernel;
     OpenMM::CudaArray pairidx0, pairidx1;
+    OpenMM::CudaArray params;
     double cutoff;
     bool ifPBC;
 };

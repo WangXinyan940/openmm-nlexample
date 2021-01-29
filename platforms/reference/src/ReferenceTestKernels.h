@@ -39,6 +39,7 @@ private:
     bool ifPBC;
     OpenMM::NeighborList* neighborList;
     std::vector<std::set<int>> exclusions;
+    std::vector<double> params;
 };
 
 } // namespace TestPlugin
