@@ -79,6 +79,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
 
         vector<vector<int>> exclusions;
+        exclusions.resize(0);
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
 
