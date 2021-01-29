@@ -37,7 +37,8 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
         neighborList = new NeighborList();
     }
     for(int ii=0;ii<numParticles;ii++){
-        params.push_back(force.getParticleParameter(ii));
+        double prm = force.getParticleParameter(ii);
+        params.push_back(prm);
     }
 }
 
