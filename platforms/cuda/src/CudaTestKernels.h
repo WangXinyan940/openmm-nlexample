@@ -4,7 +4,6 @@
 #include "TestKernels.h"
 #include "openmm/cuda/CudaContext.h"
 #include "openmm/cuda/CudaArray.h"
-#include "openmm/cuda/CudaForceInfo.h"
 #include <vector>
 #include <string>
 
@@ -37,7 +36,6 @@ public:
     double execute(OpenMM::ContextImpl& context, bool includeForces, bool includeEnergy);
 private:
     class ForceInfo;
-    ForceInfo* info;
     bool hasInitializedKernel;
     OpenMM::CudaContext& cu;
     CUfunction calcTestForcePBCKernel;

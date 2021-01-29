@@ -3,6 +3,7 @@
 #include "openmm/internal/ContextImpl.h"
 #include "openmm/cuda/CudaBondedUtilities.h"
 #include "openmm/cuda/CudaNonbondedUtilities.h"
+#include "openmm/cuda/CudaForceInfo.h"
 #include "openmm/cuda/CudaParameterSet.h"
 #include "CudaKernelSources.h"
 #include <map>
@@ -98,8 +99,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         exclusions.resize(0);
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
-    info = new ForceInfo(force);
-    cu.addForce(info);
+    cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
 }
 
@@ -130,7 +130,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
     return energy;
 }
 
-class CudaCalcTestForceKernel::ForceInfo : public CudaForceInfo {
+class CudaCalcTestForceInfo : public CudaForceInfo {
 public:
 	ForceInfo(const TestForce& force) :
 			force(force) {
@@ -142,7 +142,8 @@ public:
         return (p1 == p2);
     }
 	int getNumParticleGroups() {
-		return force.getNumParticles();
+        int natom = force.getNumParticles();
+		return natom;
 	}
 	void getParticlesInGroup(int index, vector<int>& particles) {
 		particles.resize(1);
