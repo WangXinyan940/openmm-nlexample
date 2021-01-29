@@ -99,7 +99,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         exclusions.resize(0);
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
-    cu.addForce(new CudaTestFForceInfo(force));
+    cu.addForce(new CudaTestForceInfo(force));
     hasInitializedKernel = true;
 }
 
@@ -130,7 +130,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
     return energy;
 }
 
-class CudaTestFForceInfo: public CudaForceInfo {
+class CudaTestForceInfo: public CudaForceInfo {
 public:
 	CudaTestFForceInfo(const TestForce& force) :
 			force(force) {
