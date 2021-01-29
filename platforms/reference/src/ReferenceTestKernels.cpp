@@ -40,6 +40,7 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<Vec3>& forces = extractForces(context);
     Vec3* periodicBoxVectors = extractBoxVectors(context);
     int numParticles = atomCoordinates.size();
+    cout << "nparticle " << numParticles << endl;
     double energy = 0.0;    
     double dEdR;
     vector<double> deltaR;
