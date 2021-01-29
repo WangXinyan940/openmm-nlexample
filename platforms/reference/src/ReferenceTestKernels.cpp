@@ -53,7 +53,7 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
             int ii = pair.first;
             int jj = pair.second;
             double deltaR[2][ReferenceForce::LastDeltaRIndex];
-            ReferenceForce::getDeltaRPeriodic(atomCoordinates[jj], atomCoordinates[ii], periodicBoxVectors, deltaR[0]);
+            ReferenceForce::getDeltaRPeriodic(atomCoordinates[ii], atomCoordinates[jj], periodicBoxVectors, deltaR[0]);
             double r         = deltaR[0][ReferenceForce::RIndex];
             double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
