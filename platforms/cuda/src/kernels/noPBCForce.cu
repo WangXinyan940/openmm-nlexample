@@ -12,9 +12,9 @@ extern "C" __global__ void calcTestForceNoPBC(
         int ii = pairidx0[npair];
         int jj = pairidx1[npair];
         real4 delta(0,0,0,0);
-        data.x =  posq[jj].x-posq[ii].x;
-        data.y =  posq[jj].y-posq[ii].y;
-        data.z =  posq[jj].z-posq[ii].z;
+        delta.x =  posq[jj].x-posq[ii].x;
+        delta.y =  posq[jj].y-posq[ii].y;
+        delta.z =  posq[jj].z-posq[ii].z;
         real R2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         real inverseR = RSQRT(R2);
         energyBuffer[npair] += 100.0 * inverseR * inverseR;
