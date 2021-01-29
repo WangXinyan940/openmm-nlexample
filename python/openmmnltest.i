@@ -51,9 +51,9 @@ class TestForce : public OpenMM::Force {
 public:
     TestForce();
     void addParticle(double factor);
-    int getNumParticles();
+    int getNumParticles() const;
     void setParticleParameter(int index, double factor);
-    double getParticleParameter(int index);
+    double getParticleParameter(int index) const;
     double getCutoffDistance() const;
     void setCutoffDistance(double cutoff);
     bool usesPeriodicBoundaryConditions() const;

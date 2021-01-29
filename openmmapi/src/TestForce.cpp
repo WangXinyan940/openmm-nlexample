@@ -17,7 +17,7 @@ void TestForce::addParticle(double factor){
     params.push_back(factor);
 }
 
-int TestForce::getNumParticles(){
+int TestForce::getNumParticles() const {
     return params.size();
 }
 
@@ -25,7 +25,7 @@ void TestForce::setParticleParameter(int index, double factor){
     params[index] = factor;
 }
 
-double TestForce::getParticleParameter(int index){
+double TestForce::getParticleParameter(int index) const {
     return params[index];
 }
 

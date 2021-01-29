@@ -29,7 +29,7 @@ public:
      * Get num of particles
      * @return           num
      */
-    int getNumParticles();
+    int getNumParticles() const;
     /**
      * Set particle parameter
      * @param index      index
@@ -41,7 +41,7 @@ public:
      * @param index      index
      * @return           factor
      */
-    double getParticleParameter(int index);
+    double getParticleParameter(int index) const;
     /**
      * Get Cutoff Distance
      * @return            cutoff
