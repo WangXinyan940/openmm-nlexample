@@ -44,6 +44,7 @@ public:
 protected:
     OpenMM::ForceImpl* createImpl() const;
 private:
+    double cutoffDistance;
     bool ifPBC;
 };
 
