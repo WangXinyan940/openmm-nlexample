@@ -34,10 +34,10 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
 }
 
 double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
-    vector<Vec3>& pos = extractPositions(context);
+    vector<Vec3>& atomCoordinates = extractPositions(context);
     vector<Vec3>& forces = extractForces(context);
     Vec3* box = extractBoxVectors(context);
-    int numParticles = context.getNumParticles();
+    int numParticles = atomCoordinates.size();
     double energy = 0.0;    
     double dEdR;
     vector<double> deltaR;
