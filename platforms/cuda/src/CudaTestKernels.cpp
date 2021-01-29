@@ -5,6 +5,7 @@
 #include "openmm/cuda/CudaNonbondedUtilities.h"
 #include "openmm/cuda/CudaForceInfo.h"
 #include "openmm/cuda/CudaParameterSet.h"
+#include "CudaKernelSources.h"
 #include <map>
 #include <set>
 #include <iostream>
