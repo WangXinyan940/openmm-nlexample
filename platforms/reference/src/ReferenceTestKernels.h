@@ -5,7 +5,7 @@
 #include "openmm/Platform.h"
 #include "openmm/reference/ReferenceNeighborList.h"
 #include <vector>
-#include <pair>
+#include <utility>
 #include <iostream>
 
 namespace TestPlugin {
