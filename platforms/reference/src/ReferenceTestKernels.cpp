@@ -40,7 +40,6 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<Vec3>& forces = extractForces(context);
     Vec3* periodicBoxVectors = extractBoxVectors(context);
     int numParticles = atomCoordinates.size();
-    cout << "nparticle " << numParticles << endl;
     double energy = 0.0;    
     double dEdR;
     vector<double> deltaR;
@@ -48,7 +47,7 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     if (ifPBC){
         cout << "Before NL|" << endl;
         cout << atomCoordinates.size() << " " << exclusions.size() << " " << ifPBC << " " << cutoff << endl;
-        computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
+        computeNeighborListVoxelHash(neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
         cout << "Finish NL" << endl;
         for(auto& pair : *neighborList){
             int ii = pair.first;
