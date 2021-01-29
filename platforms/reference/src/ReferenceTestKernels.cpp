@@ -29,7 +29,7 @@ ReferenceCalcTestForceKernel::~ReferenceCalcTestForceKernel() {
 }
 
 void ReferenceCalcTestForceKernel::initialize(const System& system, const TestForce& force) {
-    numParticles = system.getNumParticles();
+    int numParticles = system.getNumParticles();
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
     exclusions.resize(numParticles);
