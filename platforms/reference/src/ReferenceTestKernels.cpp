@@ -31,6 +31,7 @@ ReferenceCalcTestForceKernel::~ReferenceCalcTestForceKernel() {
 void ReferenceCalcTestForceKernel::initialize(const System& system, const TestForce& force) {
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
+    exclusions.resize(numParticles);
 }
 
 double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
@@ -43,8 +44,6 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<double> deltaR;
     deltaR.resize(5);
     if (ifPBC){
-        vector<set<int>> exclusions;
-        exclusions.resize(numParticles);
         cout << "Before NL|" << endl;
         computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
         cout << "Finish NL" << endl;
