@@ -79,7 +79,7 @@ extern "C" __global__ void calcTestForcePBC(
                 int atom2 = y*TILE_SIZE+j;
                 if (atom1 != atom2 && atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
                     // !!!! Here calc atom1-atom2 interaction !!!!
-                    computeOneInteraction(data, localData[tbx+tj], true, energy, periodicBoxSize, invPeriodicBoxSize, periodicBoxVecX, periodicBoxVecY, periodicBoxVecZ);
+                    computeOneInteraction(data, localData[tbx+j], true, energy, periodicBoxSize, invPeriodicBoxSize, periodicBoxVecX, periodicBoxVecY, periodicBoxVecZ);
                 }
             }
             atomicAdd(&forceBuffers[atom1], static_cast<unsigned long long>((long long) (data.force.x*0x100000000)));
