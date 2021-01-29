@@ -11,7 +11,7 @@ extern "C" __global__ void calcTestForceNoPBC(
     for (int npair = blockIdx.x*blockDim.x+threadIdx.x; npair < totpair; npair += blockDim.x*gridDim.x) {
         int ii = pairidx0[npair];
         int jj = pairidx1[npair];
-        real4 delta;
+        real4 delta(0,0,0,0);
         data.x =  posq[jj].x-posq[ii].x;
         data.y =  posq[jj].y-posq[ii].y;
         data.z =  posq[jj].z-posq[ii].z;
