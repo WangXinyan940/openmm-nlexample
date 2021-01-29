@@ -39,7 +39,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 
     if (!ifPBC){
         map<string, string> defines;
-        CUmodule module = cu.createModule(CudaTestKernelSources::noPBCForce, defines);
+        CUmodule module = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::noPBCForce, defines);
         calcTestForceNoPBCKernel = cu.getKernel(module, "calcTestForceNoPBC");
         vector<int> idx0;
         vector<int> idx1;
@@ -73,7 +73,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
 
         // macro for short-range
-        CUmodule PBCModule = cu.createModule(CudaTestKernelSources::PBCForce, pbcDefines);
+        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
 
         vector<vector<int>> exclusions;
