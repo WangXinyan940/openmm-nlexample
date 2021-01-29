@@ -48,17 +48,12 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<double> deltaR;
     deltaR.resize(5);
     if (ifPBC){
-        cout << "Before NL|" << endl;
-        cout << atomCoordinates.size() << " " << exclusions.size() << " " << ifPBC << " " << cutoff << endl;
         computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
-        cout << "Finish NL" << endl;
         for(auto& pair : *neighborList){
             int ii = pair.first;
             int jj = pair.second;
-            cout << "Before calc R" << endl;
             double deltaR[2][ReferenceForce::LastDeltaRIndex];
             ReferenceForce::getDeltaRPeriodic(atomCoordinates[jj], atomCoordinates[ii], periodicBoxVectors, deltaR[0]);
-            cout << "Get R" << endl;
             double r         = deltaR[0][ReferenceForce::RIndex];
             double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
