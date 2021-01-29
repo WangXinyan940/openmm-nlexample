@@ -52,7 +52,7 @@ public:
     TestForce();
     double getCutoffDistance() const;
     void setCutoffDistance(double cutoff);
-    bool usesPeriodicBoundaryConditions();
+    bool usesPeriodicBoundaryConditions() const;
     void setUsesPeriodicBoundaryConditions(bool ifPeriod);
     /*
      * Add methods for casting a Force to a TestForce.

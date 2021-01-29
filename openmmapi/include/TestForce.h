@@ -34,7 +34,7 @@ public:
      * Return if PBC is used in this force. Default is no.
      * @return             whether PBC system
      */
-    bool usesPeriodicBoundaryConditions();
+    bool usesPeriodicBoundaryConditions() const;
     /**
      * Set if using PBC in the system.
      * @param ifPeriod     if use PBC
