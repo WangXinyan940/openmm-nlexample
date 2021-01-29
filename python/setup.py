@@ -16,7 +16,7 @@ if platform.system() == 'Darwin':
 
 extension = Extension(name='_openmmnltest',
                       sources=['TestPluginWrapper.cpp'],
-                      libraries=['OpenMM', 'OpenMMNLTest'],
+                      libraries=['OpenMM', 'OpenMMTest'],
                       include_dirs=[os.path.join(openmm_dir, 'include')],
                       library_dirs=[os.path.join(openmm_dir, 'lib')],
                       runtime_library_dirs=[os.path.join(openmm_dir, 'lib')],

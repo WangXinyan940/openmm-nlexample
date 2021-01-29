@@ -5,7 +5,7 @@
 # Collect up information about the version of the OpenMM library we're building
 # and make it available to the code so it can be built into the binaries.
 
-SET(NLTEST_REFERENCE_LIBRARY_NAME OpenMMCosAccReference)
+SET(NLTEST_REFERENCE_LIBRARY_NAME OpenMMTestReference)
 
 SET(SHARED_TARGET ${NLTEST_REFERENCE_LIBRARY_NAME})
 

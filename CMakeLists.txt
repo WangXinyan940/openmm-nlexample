@@ -38,7 +38,7 @@ SET(${PROJECT_NAME}_LIBRARY_DIR    ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR})
 SET(NLTEST_PLUGIN_SOURCE_SUBDIRS openmmapi)
 
 # Set the library name
-SET(NLTEST_LIBRARY_NAME OpenMMCosAcc)
+SET(NLTEST_LIBRARY_NAME OpenMMTest)
 SET(SHARED_NLTEST_TARGET ${NLTEST_LIBRARY_NAME})
 
 # These are all the places to search for header files which are to be part of the API.
