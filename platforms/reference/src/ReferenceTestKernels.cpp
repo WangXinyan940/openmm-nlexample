@@ -29,7 +29,6 @@ ReferenceCalcTestForceKernel::~ReferenceCalcTestForceKernel() {
 }
 
 void ReferenceCalcTestForceKernel::initialize(const System& system, const TestForce& force) {
-    int numParticles = system.getNumParticles();
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
 }
@@ -38,6 +37,7 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<Vec3>& pos = extractPositions(context);
     vector<Vec3>& forces = extractForces(context);
     Vec3* box = extractBoxVectors(context);
+    int numParticles = system.getNumParticles();
     double energy = 0.0;    
     double dEdR;
     vector<double> deltaR;
