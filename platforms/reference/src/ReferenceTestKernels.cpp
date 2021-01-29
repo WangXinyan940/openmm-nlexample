@@ -3,7 +3,7 @@
 #include "openmm/OpenMMException.h"
 #include "openmm/internal/ContextImpl.h"
 #include "openmm/reference/ReferencePlatform.h"
-#include "ReferenceForce.h"
+#include "openmm/reference/ReferenceForce.h"
 #include <cmath>
 
 using namespace OpenMM;
