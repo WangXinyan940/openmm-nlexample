@@ -40,7 +40,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
     if (cu.getUseDoublePrecision()){
         vector<double> parameters;
         for(int ii=0;ii<numParticles;ii++){
-            double prm = force.getParticleParameter(ii)
+            double prm = force.getParticleParameter(ii);
             parameters.push_back(prm);
         }
         params.initialize(cu, numParticles, elementSize, "params");
