@@ -36,14 +36,14 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
 double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
     vector<Vec3>& atomCoordinates = extractPositions(context);
     vector<Vec3>& forces = extractForces(context);
-    Vec3* box = extractBoxVectors(context);
+    Vec3* periodicBoxVectors = extractBoxVectors(context);
     int numParticles = atomCoordinates.size();
     double energy = 0.0;    
     double dEdR;
     vector<double> deltaR;
     deltaR.resize(5);
     if (ifPBC){
-        computeNeighborListVoxelHash(*neighborList, numParticles, pos, vector<set<int>>, box, ifPBC, cutoff, 0.0);
+        computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, vector<set<int>>, periodicBoxVectors, ifPBC, cutoff, 0.0);
         for(auto& pair : *neighborList){
             int ii = pair.first;
             int jj = pair.second;
