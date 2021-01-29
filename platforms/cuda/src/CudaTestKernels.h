@@ -4,6 +4,7 @@
 #include "TestKernels.h"
 #include "openmm/cuda/CudaContext.h"
 #include "openmm/cuda/CudaArray.h"
+#include "openmm/cuda/CudaForceInfo.h"
 #include <vector>
 #include <string>
 
