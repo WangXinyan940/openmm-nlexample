@@ -37,6 +37,7 @@ public:
     double execute(OpenMM::ContextImpl& context, bool includeForces, bool includeEnergy);
 private:
     class ForceInfo;
+    ForceInfo* info;
     bool hasInitializedKernel;
     OpenMM::CudaContext& cu;
     CUfunction calcTestForcePBCKernel;
