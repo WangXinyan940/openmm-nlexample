@@ -47,33 +47,6 @@ private:
     bool ifPBC;
 };
 
-class CudaTestForceInfo: public CudaForceInfo {
-public:
-	CudaTestFForceInfo(const TestForce& force) :
-			force(force) {
-	}
-    bool areParticlesIdentical(int particle1, int particle2) {
-        double p1, p2;
-        p1 = force.getParticleParameter(particle1);
-        p2 = force.getParticleParameter(particle2);
-        return (p1 == p2);
-    }
-	int getNumParticleGroups() {
-		return force.getNumParticles();
-	}
-	void getParticlesInGroup(int index, vector<int>& particles) {
-		particles.resize(1);
-        particles[0] = index;
-	}
-	bool areGroupsIdentical(int group1, int group2) {
-		double p1 = force.getParticleParameter(group1);
-        double p2 = force.getParticleParameter(group2);
-		return (p1 == p2);
-	}
-private:
-	const TestForce& force;
-};
-
 } // namespace TestPlugin
 
 #endif /*CUDA_TEST_KERNELS_H_*/
