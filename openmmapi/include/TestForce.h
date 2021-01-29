@@ -4,7 +4,7 @@
 #include "openmm/Context.h"
 #include "openmm/Force.h"
 #include <string>
-#include <pair>
+#include <utility>
 #include <vector>
 
 namespace TestPlugin {
