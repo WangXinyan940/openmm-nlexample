@@ -39,7 +39,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 
     if (!ifPBC){
         map<string, string> defines;
-        CUmoudle module = cu.createModule(CudaCoulKernelSources::noPBCForce, defines);
+        CUmodule module = cu.createModule(CudaCoulKernelSources::noPBCForce, defines);
         calcTestForceNoPBCKernel = cu.getKernel(module, "calcTestForceNoPBC");
         vector<int> idx0;
         vector<int> idx1;
@@ -98,7 +98,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosQ().getDevicePointer(), &cu.getForce().getDevicePointer(), 
+        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
             &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
     }
