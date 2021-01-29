@@ -37,7 +37,7 @@ namespace OpenMM {
  * kernels subfolder.
  */
 
-class OPENMM_EXPORT_CUDA CudaKernelSources {
+class CudaKernelSources {
 public:
 static const std::string gbsaObc1;
 static const std::string findInteractingBlocks;
