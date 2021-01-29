@@ -9,7 +9,7 @@ inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __res
     data.pos = make_real3(atomPosq.x, atomPosq.y, atomPosq.z);
 }
 
-__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
+__device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
     // Compute the displacement.
     real3 delta;
     delta.x = atom2.pos.x - atom1.pos.x;
@@ -45,7 +45,7 @@ extern "C" __global__ void calcTestForcePBC(
     real4                                invPeriodicBoxSize,
     real4                                periodicBoxVecX, 
     real4                                periodicBoxVecY, 
-    real4                                periodicBoxVecZ
+    real4                                periodicBoxVecZ,
     int                                  numParticles,
     int                                  paddedNumAtoms
 ) {
@@ -154,7 +154,7 @@ extern "C" __global__ void calcTestForcePBC(
             for (j = 0; j < TILE_SIZE; j++) {
                 int atom2 = atomIndices[tbx+tj];
                 if (atom1 < NUM_ATOMS && atom2 < NUM_ATOMS) {
-                    computeOneInteraction(data, localData[tbx+tj], false, energy);
+                    computeOneInteraction(data, localData[tbx+tj], false, energy, periodicBoxSize, invPeriodicBoxSize, periodicBoxVecX, periodicBoxVecY, periodicBoxVecZ);
                 }
                 tj = (tj + 1) & (TILE_SIZE - 1);
             }
