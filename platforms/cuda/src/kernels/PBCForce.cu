@@ -11,10 +11,7 @@ inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __res
 
 __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
     // Compute the displacement.
-    real3 delta;
-    delta.x = atom2.pos.x - atom1.pos.x;
-    delta.y = atom2.pos.y - atom1.pos.y;
-    delta.z = atom2.pos.z - atom1.pos.z;
+    real3 delta = make_real3(atom2.pos.x - atom1.pos.x, atom2.pos.y - atom1.pos.y, atom2.pos.z - atom1.pos.z);
     APPLY_PERIODIC_TO_DELTA(delta)
     real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
     real rInv = RSQRT(r2);
@@ -22,12 +19,12 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
 
     energy += 100.0 * rInv * rInv;
     mixed dEdRdR = - 200.0 * rInv * rInv * rInv * rInv;
-    atom1.force.x -= dEdRdR * atom1.pos.x;
-    atom1.force.y -= dEdRdR * atom1.pos.y;
-    atom1.force.z -= dEdRdR * atom1.pos.z;
-    atom2.force.x += dEdRdR * atom2.pos.x;
-    atom2.force.y += dEdRdR * atom2.pos.y;
-    atom2.force.z += dEdRdR * atom2.pos.z;
+    atom1.force.x += dEdRdR * delta.x;
+    atom1.force.y += dEdRdR * delta.y;
+    atom1.force.z += dEdRdR * delta.z;
+    atom2.force.x -= dEdRdR * delta.x;
+    atom2.force.y -= dEdRdR * delta.y;
+    atom2.force.z -= dEdRdR * delta.z;
 }
 
 extern "C" __global__ void calcTestForcePBC(
