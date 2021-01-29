@@ -38,6 +38,8 @@ extern "C" __global__ void calcTestForcePBC(
     unsigned int                         startTileIndex, 
     unsigned int                         numTileIndices,
     const int*          __restrict__     tiles,
+    const unsigned int* __restrict__     interactionCount,
+    const unsigned int* __restrict__     interactingAtoms,
     unsigned int                         maxTiles, 
     real4                                periodicBoxSize, 
     real4                                periodicBoxVecX, 

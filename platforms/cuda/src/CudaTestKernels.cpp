@@ -63,6 +63,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
         pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
         pbcDefines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
+        defines["THREAD_BLOCK_SIZE"] = cu.intToString(cu.getNonbondedUtilities().getForceThreadBlockSize());
 
         pbcDefines["TILE_SIZE"] = cu.intToString(CudaContext::TileSize);
         int numExclusionTiles = tilesWithExclusions.size();
@@ -96,7 +97,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         unsigned int maxTiles = nb.getInteractingTiles().getSize();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
             &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
-            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &maxTiles,
+            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(), &maxTiles,
             cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
             cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
