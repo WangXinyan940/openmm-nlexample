@@ -17,7 +17,7 @@ using namespace std;
 
 class CudaCalcTestForceInfo : public CudaForceInfo {
 public:
-	ForceInfo(const TestForce& force) :
+	CudaCalcTestForceInfo(const TestForce& force) :
 			force(force) {
 	}
     bool areParticlesIdentical(int particle1, int particle2) {
