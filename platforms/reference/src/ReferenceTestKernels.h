@@ -37,7 +37,7 @@ public:
 private:
     double cutoff;
     bool ifPBC;
-    NeighborList* neighborList;
+    OpenMM::NeighborList* neighborList;
 };
 
 } // namespace TestPlugin
