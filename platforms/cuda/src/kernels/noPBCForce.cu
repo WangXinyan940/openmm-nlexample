@@ -11,7 +11,10 @@ extern "C" __global__ void calcTestForceNoPBC(
     for (int npair = blockIdx.x*blockDim.x+threadIdx.x; npair < totpair; npair += blockDim.x*gridDim.x) {
         int ii = pairidx0[npair];
         int jj = pairidx1[npair];
-        real4 delta = make_real4(posq[jj].x-posq[ii].x, posq[jj].y-posq[ii].y, posq[jj].z-posq[ii].z, 0);
+        real4 delta;
+        data.x =  posq[jj].x-posq[ii].x;
+        data.y =  posq[jj].y-posq[ii].y;
+        data.z =  posq[jj].z-posq[ii].z;
         real R2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         real inverseR = RSQRT(R2);
         energyBuffer[npair] += 100.0 * inverseR * inverseR;
