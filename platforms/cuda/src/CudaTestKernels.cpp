@@ -132,7 +132,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
 
 class CudaCalcTestForceKernel::ForceInfo : public CudaForceInfo {
 public:
-	CudaTestFForceInfo(const TestForce& force) :
+	ForceInfo(const TestForce& force) :
 			force(force) {
 	}
     bool areParticlesIdentical(int particle1, int particle2) {
