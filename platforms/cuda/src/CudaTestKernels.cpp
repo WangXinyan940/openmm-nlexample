@@ -15,6 +15,34 @@ using namespace TestPlugin;
 using namespace OpenMM;
 using namespace std;
 
+class CudaCalcTestForceInfo : public CudaForceInfo {
+public:
+	ForceInfo(const TestForce& force) :
+			force(force) {
+	}
+    bool areParticlesIdentical(int particle1, int particle2) {
+        double p1, p2;
+        p1 = force.getParticleParameter(particle1);
+        p2 = force.getParticleParameter(particle2);
+        return (p1 == p2);
+    }
+	int getNumParticleGroups() {
+        int natom = force.getNumParticles();
+		return natom;
+	}
+	void getParticlesInGroup(int index, vector<int>& particles) {
+		particles.resize(1);
+        particles[0] = index;
+	}
+	bool areGroupsIdentical(int group1, int group2) {
+		double p1 = force.getParticleParameter(group1);
+        double p2 = force.getParticleParameter(group2);
+		return (p1 == p2);
+	}
+private:
+	const TestForce& force;
+};
+
 CudaCalcTestForceKernel::~CudaCalcTestForceKernel() {
 }
 
@@ -130,30 +158,3 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
     return energy;
 }
 
-class CudaCalcTestForceInfo : public CudaForceInfo {
-public:
-	ForceInfo(const TestForce& force) :
-			force(force) {
-	}
-    bool areParticlesIdentical(int particle1, int particle2) {
-        double p1, p2;
-        p1 = force.getParticleParameter(particle1);
-        p2 = force.getParticleParameter(particle2);
-        return (p1 == p2);
-    }
-	int getNumParticleGroups() {
-        int natom = force.getNumParticles();
-		return natom;
-	}
-	void getParticlesInGroup(int index, vector<int>& particles) {
-		particles.resize(1);
-        particles[0] = index;
-	}
-	bool areGroupsIdentical(int group1, int group2) {
-		double p1 = force.getParticleParameter(group1);
-        double p2 = force.getParticleParameter(group2);
-		return (p1 == p2);
-	}
-private:
-	const TestForce& force;
-};
