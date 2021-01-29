@@ -119,8 +119,6 @@ extern "C" __global__ void calcTestForcePBC(
         return; // There wasn't enough memory for the neighbor list.
     int pos = (int) (numTiles > maxTiles ? startTileIndex+warp*(long long)numTileIndices/totalWarps : warp*(long long)numTiles/totalWarps);
     int end = (int) (numTiles > maxTiles ? startTileIndex+(warp+1)*(long long)numTileIndices/totalWarps : (warp+1)*(long long)numTiles/totalWarps);
-    int skipBase = 0;
-    int currentSkipIndex = tbx;
     __shared__ int atomIndices[THREAD_BLOCK_SIZE];
     __shared__ volatile int skipTiles[THREAD_BLOCK_SIZE];
     skipTiles[threadIdx.x] = -1;
