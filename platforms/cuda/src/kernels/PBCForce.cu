@@ -39,10 +39,10 @@ extern "C" __global__ void calcTestForcePBC(
     unsigned int                         numTileIndices,
     const int*          __restrict__     tiles,
     unsigned int                         maxTiles, 
-    real4               __restrict__     periodicBoxSize, 
-    real4               __restrict__     periodicBoxVecX, 
-    real4               __restrict__     periodicBoxVecY, 
-    real4               __restrict__     periodicBoxVecZ
+    real4                                periodicBoxSize, 
+    real4                                periodicBoxVecX, 
+    real4                                periodicBoxVecY, 
+    real4                                periodicBoxVecZ
     int                                  numParticles,
     int                                  paddedNumAtoms
 ) {
@@ -69,7 +69,6 @@ extern "C" __global__ void calcTestForcePBC(
         if (x == y) {
             // This tile is on the diagonal.
             localData[threadIdx.x].pos = data.pos;
-            localData[threadIdx.x].q = data.q;
 
             // Compute forces.
 
@@ -156,8 +155,6 @@ extern "C" __global__ void calcTestForcePBC(
                 }
                 tj = (tj + 1) & (TILE_SIZE - 1);
             }
-            data.force *= -ENERGY_SCALE_FACTOR;
-            localData[threadIdx.x].force *= -ENERGY_SCALE_FACTOR;
 
             // Write results.
 
@@ -172,5 +169,5 @@ extern "C" __global__ void calcTestForcePBC(
         }
         pos++;
     }
-    energyBuffer[blockIdx.x*blockDim.x+threadIdx.x] += energy*ENERGY_SCALE_FACTOR;
+    energyBuffer[blockIdx.x*blockDim.x+threadIdx.x] += energy;
 }

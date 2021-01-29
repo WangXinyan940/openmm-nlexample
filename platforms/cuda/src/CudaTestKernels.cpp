@@ -93,9 +93,10 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
         int startTileIndex = nb.getStartTileIndex();
         int numTileIndices = nb.getNumTiles();
+        unsigned int maxTiles = nb.getInteractingTiles().getSize();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
             &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
-            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(),
+            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &maxTiles,
             cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
             cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
