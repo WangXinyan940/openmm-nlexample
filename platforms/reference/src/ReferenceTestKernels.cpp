@@ -43,7 +43,8 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
     vector<double> deltaR;
     deltaR.resize(5);
     if (ifPBC){
-        computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, vector<set<int>>, periodicBoxVectors, ifPBC, cutoff, 0.0);
+        vector<set<int>> exclusions;
+        computeNeighborListVoxelHash(*neighborList, numParticles, atomCoordinates, exclusions, periodicBoxVectors, ifPBC, cutoff, 0.0);
         for(auto& pair : *neighborList){
             int ii = pair.first;
             int jj = pair.second;
