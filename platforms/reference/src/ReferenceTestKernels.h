@@ -38,7 +38,7 @@ private:
     double cutoff;
     bool ifPBC;
     OpenMM::NeighborList* neighborList;
-    vector<set<int>> exclusions;
+    std::vector<std::set<int>> exclusions;
 };
 
 } // namespace TestPlugin
