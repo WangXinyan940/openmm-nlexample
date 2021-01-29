@@ -59,7 +59,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pairidx1.upload(idx1);
     } else {
         map<string, string> pbcDefines;
-        pbcDefines["NUM_ATOMS"] = cu.intToString(numMultipoles);
+        pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
         pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
         pbcDefines["NUM_BLOCKS"] = cu.intToString(cu.getNumAtomBlocks());
 
@@ -86,10 +86,12 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
 
     int numParticles = cu.getNumAtoms();
-    CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
     double energy = 0.0;
     if (ifPBC){
         int paddedNumAtoms = cu.getPaddedNumAtoms();
+        CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
+        int startTileIndex = nb.getStartTileIndex();
+        int numTileIndices = nb.getNumTiles();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
             &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
             &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(),
