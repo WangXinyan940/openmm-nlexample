@@ -8,7 +8,7 @@ typedef struct {
 inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __restrict__ posq, real prm) {
     real4 atomPosq = posq[atom];
     data.pos = make_real3(atomPosq.x, atomPosq.y, atomPosq.z);
-    param = prm;
+    data.param = prm;
 }
 
 __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
