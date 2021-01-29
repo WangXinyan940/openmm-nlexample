@@ -18,7 +18,7 @@ extern "C" __global__ void calcTestForceNoPBC(
         real R2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
         real inverseR = RSQRT(R2);
         energyBuffer[npair] += 100.0 * inverseR * inverseR;
-        real4 dEdR = - 200.0 * inverseR * inverseR * inverseR;
+        real dEdR = - 200.0 * inverseR * inverseR * inverseR;
         real4 force = dEdR * delta * inverseR;
         atomicAdd(&forceBuffers[ii], static_cast<unsigned long long>((long long) (-force.x*0x100000000)));
         atomicAdd(&forceBuffers[ii+paddedNumAtoms], static_cast<unsigned long long>((long long) (-force.y*0x100000000)));
