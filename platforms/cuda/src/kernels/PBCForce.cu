@@ -42,6 +42,7 @@ extern "C" __global__ void calcTestForcePBC(
     const unsigned int* __restrict__     interactingAtoms,
     unsigned int                         maxTiles, 
     real4                                periodicBoxSize, 
+    real4                                invPeriodicBoxSize,
     real4                                periodicBoxVecX, 
     real4                                periodicBoxVecY, 
     real4                                periodicBoxVecZ

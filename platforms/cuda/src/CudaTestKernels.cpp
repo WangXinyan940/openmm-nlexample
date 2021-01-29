@@ -98,8 +98,8 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
             &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
             &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(), &maxTiles,
-            cu.getPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
-            cu.getPeriodicBoxVecXPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms};
+            cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
+            cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms};
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
