@@ -39,17 +39,17 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
     // }
     if (cu.getUseDoublePrecision()){
         vector<double> parameters;
-        for(int ii=0;ii<force.getNumParticles();ii++){
+        for(int ii=0;ii<numParticles;ii++){
             parameters.push_back(force.getParticleParameter(ii));
         }
-        params.initialize(cu, force.getNumParticles(), elementSize, "params");
+        params.initialize(cu, numParticles, elementSize, "params");
         params.upload(parameters);
     } else {
         vector<float> parameters;
-        for(int ii=0;ii<force.getNumParticles();ii++){
+        for(int ii=0;ii<numParticles;ii++){
             parameters.push_back(force.getParticleParameter(ii));
         }
-        params.initialize(cu, force.getNumParticles(), elementSize, "params");
+        params.initialize(cu, numParticles, elementSize, "params");
         params.upload(parameters);
     }
 
