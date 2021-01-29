@@ -1,6 +1,10 @@
 #include "CudaTestKernels.h"
 #include "CudaTestKernelSources.h"
 #include "openmm/internal/ContextImpl.h"
+#include "openmm/cuda/CudaBondedUtilities.h"
+#include "openmm/cuda/CudaNonbondedUtilities.h"
+#include "openmm/cuda/CudaForceInfo.h"
+#include "openmm/cuda/CudaParameterSet.h"
 #include <map>
 #include <set>
 #include <iostream>
