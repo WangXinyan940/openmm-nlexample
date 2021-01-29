@@ -1,31 +1,31 @@
-#ifndef COUL_KERNELS_H_
-#define COUL_KERNELS_H_
+#ifndef TEST_KERNELS_H_
+#define TEST_KERNELS_H_
 
-#include "CoulForce.h"
+#include "TestForce.h"
 #include "openmm/KernelImpl.h"
 #include "openmm/Platform.h"
 #include "openmm/System.h"
 #include <string>
 
-namespace CoulPlugin {
+namespace TestPlugin {
 
 /**
- * This kernel is invoked by CoulForce to calculate the forces acting on the system and the energy of the system.
+ * This kernel is invoked by TestForce to calculate the forces acting on the system and the energy of the system.
  */
-class CalcCoulForceKernel : public OpenMM::KernelImpl {
+class CalcTestForceKernel : public OpenMM::KernelImpl {
 public:
     static std::string Name() {
-        return "CalcCoulForce";
+        return "CalcTestForce";
     }
-    CalcCoulForceKernel(std::string name, const OpenMM::Platform& platform) : OpenMM::KernelImpl(name, platform) {
+    CalcTestForceKernel(std::string name, const OpenMM::Platform& platform) : OpenMM::KernelImpl(name, platform) {
     }
     /**
      * Initialize the kernel.
      * 
      * @param system         the System this kernel will be applied to
-     * @param force          the CoulForce this kernel will be used for
+     * @param force          the TestForce this kernel will be used for
      */
-    virtual void initialize(const OpenMM::System& system, const CoulForce& force) = 0;
+    virtual void initialize(const OpenMM::System& system, const TestForce& force) = 0;
     /**
      * Execute the kernel to calculate the forces and/or energy.
      *
@@ -37,6 +37,6 @@ public:
     virtual double execute(OpenMM::ContextImpl& context, bool includeForces, bool includeEnergy) = 0;
 };
 
-} // namespace CoulPlugin
+} // namespace TestPlugin
 
-#endif /*COUL_KERNELS_H_*/
+#endif /*TEST_KERNELS_H_*/
