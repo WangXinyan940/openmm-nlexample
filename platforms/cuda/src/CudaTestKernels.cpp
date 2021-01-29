@@ -2,7 +2,9 @@
 #include "CudaTestKernelSources.h"
 #include "openmm/internal/ContextImpl.h"
 #include <map>
+#include <set>
 #include <iostream>
+#include <utility>
 
 using namespace TestPlugin;
 using namespace OpenMM;
@@ -80,6 +82,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
 
     int numParticles = cu.getNumAtoms();
+    CudaNonbondedUtilities& nb = cu.getNonbondedUtilities();
     double energy = 0.0;
     if (ifPBC){
         int paddedNumAtoms = cu.getPaddedNumAtoms();
