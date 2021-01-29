@@ -12,7 +12,7 @@ inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __res
 }
 
 __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
-    if (hasExclusions) {
+    if (!hasExclusions) {
         // Compute the displacement.
         real3 delta = make_real3(atom2.pos.x - atom1.pos.x, atom2.pos.y - atom1.pos.y, atom2.pos.z - atom1.pos.z);
         APPLY_PERIODIC_TO_DELTA(delta)
