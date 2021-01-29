@@ -3,7 +3,7 @@
 
 #include "TestKernels.h"
 #include "openmm/Platform.h"
-#include "ReferenceNeighborList.h"
+#include "openmm/reference/ReferenceNeighborList.h"
 #include <vector>
 #include <pair>
 #include <iostream>
