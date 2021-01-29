@@ -33,6 +33,9 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
     exclusions.resize(numParticles);
+    if (ifPBC) {
+        neighborList = new NeighborList();
+    }
 }
 
 double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
