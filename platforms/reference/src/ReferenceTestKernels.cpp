@@ -48,9 +48,10 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
         for(auto& pair : *neighborList){
             int ii = pair.first;
             int jj = pair.second;
-
+            cout << "Before calc R" << endl;
             double deltaR[2][ReferenceForce::LastDeltaRIndex];
             ReferenceForce::getDeltaRPeriodic(atomCoordinates[jj], atomCoordinates[ii], periodicBoxVectors, deltaR[0]);
+            cout << "Get R" << endl;
             double r         = deltaR[0][ReferenceForce::RIndex];
             double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
@@ -76,8 +77,8 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
                     double dEdRdR = - 200.0 * inverseR * inverseR * inverseR * inverseR;
                     for(int kk=0;kk<3;kk++){
                         double fconst = dEdRdR*deltaR[0][kk];
-                        forces[ii][kk] -= fconst;
-                        forces[jj][kk] += fconst;
+                        forces[ii][kk] += fconst;
+                        forces[jj][kk] -= fconst;
                     }
                 }
                 energy += 100. * inverseR * inverseR;
