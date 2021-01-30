@@ -140,7 +140,7 @@ extern "C" __global__ void computeNonbonded(
             for (unsigned int j = 0; j < TILE_SIZE; j++) {
                 int atom2 = tbx+j;
                 real4 posq2;
-                posq2 = make_real4(localData[atom2].x, localData[atom2].y, localData[atom2].z, localData[atom2].q);
+                posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
                 real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
                 APPLY_PERIODIC_TO_DELTA(delta)
                 real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
@@ -179,7 +179,6 @@ extern "C" __global__ void computeNonbonded(
             localData[threadIdx.x].x = shflPosq.x;
             localData[threadIdx.x].y = shflPosq.y;
             localData[threadIdx.x].z = shflPosq.z;
-            localData[threadIdx.x].q = shflPosq.w;
             localData[threadIdx.x].fx = 0.0f;
             localData[threadIdx.x].fy = 0.0f;
             localData[threadIdx.x].fz = 0.0f;
@@ -190,7 +189,7 @@ extern "C" __global__ void computeNonbonded(
             unsigned int tj = tgx;
             for (j = 0; j < TILE_SIZE; j++) {
                 int atom2 = tbx+tj;
-                real4 posq2 = make_real4(localData[atom2].x, localData[atom2].y, localData[atom2].z, localData[atom2].q);
+                real3 posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
                 real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
                 APPLY_PERIODIC_TO_DELTA(delta)
                 real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
@@ -292,7 +291,6 @@ extern "C" __global__ void computeNonbonded(
                 localData[threadIdx.x].x = posq[j].x;
                 localData[threadIdx.x].y = posq[j].y;
                 localData[threadIdx.x].z = posq[j].z;
-                localData[threadIdx.x].q = posq[j].w;
                 localData[threadIdx.x].fx = 0.0f;
                 localData[threadIdx.x].fy = 0.0f;
                 localData[threadIdx.x].fz = 0.0f;
@@ -310,7 +308,7 @@ extern "C" __global__ void computeNonbonded(
             unsigned int tj = tgx;
             for (j = 0; j < TILE_SIZE; j++) {
                 int atom2 = tbx+tj;
-                real4 posq2 = make_real4(localData[atom2].x, localData[atom2].y, localData[atom2].z, localData[atom2].q);
+                real3 posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
                 real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
                 APPLY_PERIODIC_TO_DELTA(delta)
 
