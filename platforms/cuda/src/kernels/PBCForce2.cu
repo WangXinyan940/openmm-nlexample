@@ -156,7 +156,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.fy = 0;
                 atom2Data.fz = 0;
                 atom2 = y*TILE_SIZE+j;
-                localData[atom2].prm = params[atomIndex[atom2]];
+                atom2Data.prm = params[atomIndex[atom2]];
 
                 real dEdR = 0.0f;
                 bool isExcluded = (atom1 >= NUM_ATOMS || atom2 >= NUM_ATOMS || !(excl & 0x1));
