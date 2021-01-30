@@ -169,8 +169,10 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 0.5f;
                 // COMPUTE_INTERACTION
-                tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-                dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                if (!isExcluded && r2 < cutoff2) {
+                    tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                    dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                }
                 // printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += 0.5f*tempEnergy;
