@@ -169,7 +169,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += 0.5f*tempEnergy;
                 force.x -= delta.x*dEdR;
@@ -222,7 +222,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -313,6 +313,7 @@ extern "C" __global__ void computeNonbonded(
                 localData[threadIdx.x].y = 0;
                 localData[threadIdx.x].z = 0;
                 localData[threadIdx.x].prm = 0;
+                localData[threadIdx.x].idx = -100;
             }
 
             // We need to apply periodic boundary conditions separately for each interaction.
@@ -347,7 +348,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
 
@@ -439,7 +440,7 @@ extern "C" __global__ void computeNonbonded(
         // COMPUTE_INTERACTION
         tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
         dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-        printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+        printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
         energy += tempEnergy;
 
