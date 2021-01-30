@@ -127,8 +127,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 
         vector<vector<int>> exclusions;
         exclusions.resize(0);
-        cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
-        cu.getNonbondedUtilities().setUsePadding(false);
+        cu.getNonbondedUtilities().addInteraction(true, true, true, 1.1*cutoff, exclusions, "", force.getForceGroup());
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
