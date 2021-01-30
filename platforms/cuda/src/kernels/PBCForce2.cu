@@ -358,7 +358,7 @@ extern "C" __global__ void computeNonbonded(
             atomicAdd(&forceBuffers[atom1+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (force.y*0x100000000)));
             atomicAdd(&forceBuffers[atom1+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (force.z*0x100000000)));
 
-            unsigned int atom2 = atomIndices[threadIdx.x];
+            int atom2 = atomIndices[threadIdx.x];
 
             if (atom2 < PADDED_NUM_ATOMS) {
 
@@ -379,6 +379,7 @@ extern "C" __global__ void computeNonbonded(
         int2 pair = singlePairs[i];
         int atom1 = pair.x;
         int atom2 = pair.y;
+        real3 force = make_real3(0);
         real4 posq1 = posq[atom1];
         real4 posq2 = posq[atom2];
         // LOAD_ATOM1_PARAMETERS
