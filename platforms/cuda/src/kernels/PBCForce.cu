@@ -96,7 +96,7 @@ extern "C" __global__ void calcTestForcePBC(
             // This is an off-diagonal tile.
 
             unsigned int j = y*TILE_SIZE + tgx;
-            loadAtomData(localData[threadIdx.x], j, posq, params[atomIndex[j]]);
+            loadAtomData(localData[threadIdx.x], j, atomIndex[j], posq, params[atomIndex[j]]);
             localData[threadIdx.x].force = make_real3(0);
             unsigned int tj = tgx;
             for (j = 0; j < TILE_SIZE; j++) {
@@ -146,7 +146,7 @@ extern "C" __global__ void calcTestForcePBC(
             data.force = make_real3(0);
             unsigned int j = interactingAtoms[pos*TILE_SIZE+tgx];
             atomIndices[threadIdx.x] = j;
-            loadAtomData(localData[threadIdx.x], j, posq, params[atomIndex[j]]);
+            loadAtomData(localData[threadIdx.x], j, atomIndex[j], posq, params[atomIndex[j]]);
             localData[threadIdx.x].force = make_real3(0);
 
             // Compute forces.
