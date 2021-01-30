@@ -5,7 +5,7 @@ typedef struct {
     real x, y, z;
     real prm;
     real fx, fy, fz;
-    int idx,
+    int idx;
 } AtomData;
 
 
@@ -212,7 +212,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.fy = 0.0;
                 atom2Data.fz = 0.0;
                 atom2Data.prm = params[atomIndex[atom2]];
-                atom2Data.idx = atimIndex[atom2];
+                atom2Data.idx = atomIndex[atom2];
 
                 
                 real dEdR = 0.0f;
