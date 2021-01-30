@@ -171,7 +171,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += 0.5f*tempEnergy;
                 force.x -= delta.x*dEdR;
@@ -224,7 +224,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -353,7 +353,7 @@ extern "C" __global__ void computeNonbonded(
                     // COMPUTE_INTERACTION
                     tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                     dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                    printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                    // printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                     energy += tempEnergy;
 
@@ -394,7 +394,6 @@ extern "C" __global__ void computeNonbonded(
     // Third loop: single pairs that aren't part of a tile.
     const unsigned int numPairs = interactionCount[1];
     if (numPairs > maxSinglePairs) {
-        printf("Out 3\n");
         return; // There wasn't enough memory for the neighbor list.
     }
     for (int i = blockIdx.x*blockDim.x+threadIdx.x; i < numPairs; i += blockDim.x*gridDim.x) {
@@ -449,7 +448,7 @@ extern "C" __global__ void computeNonbonded(
         // COMPUTE_INTERACTION
         tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
         dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-        printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+        // printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
         energy += tempEnergy;
 
