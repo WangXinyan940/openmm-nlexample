@@ -197,7 +197,7 @@ extern "C" __global__ void computeNonbonded(
                 real invR = RSQRT(r2);
                 real r = r2*invR;
                 // LOAD_ATOM2_PARAMETERS
-                atom2 = y*TILE_SIZE+tj;
+                int atom2 = y*TILE_SIZE+tj;
                 AtomData atom2Data;
                 atom2Data.x = posq2.x;
                 atom2Data.y = posq2.y;
@@ -392,12 +392,12 @@ extern "C" __global__ void computeNonbonded(
         atom1Data.fz = 0.0;
         atom1Data.prm = params[atomIndex[atom1]];
 
-        int j = atom2;
-        atom2 = threadIdx.x;
+        // int j = atom2;
+        // atom2 = threadIdx.x;
         
         // LOAD_LOCAL_PARAMETERS_FROM_GLOBAL
         // LOAD_ATOM2_PARAMETERS
-        atom2 = pair.y;
+        // atom2 = pair.y;
         AtomData atom2Data;
         atom2Data.x = posq2.x;
         atom2Data.y = posq2.y;
