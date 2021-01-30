@@ -15,12 +15,12 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
     if (!hasExclusions) {
         // Compute the displacement.
         real3 delta = make_real3(atom2.pos.x - atom1.pos.x, atom2.pos.y - atom1.pos.y, atom2.pos.z - atom1.pos.z);
-        // APPLY_PERIODIC_TO_DELTA(delta)
+        APPLY_PERIODIC_TO_DELTA(delta)
         real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
         real rInv = RSQRT(r2);
-        // real r = r2*rInv;
+        real r = r2*rInv;
         real p1p2 = atom1.param * atom2.param;
-        // printf("%f %f %f\n", atom1.param, atom2.param, rInv);
+        printf("%f %f %f\n", atom1.param, atom2.param, r);
         energy += p1p2 * rInv * rInv;
         mixed dEdRdR = - 2 * p1p2 * rInv * rInv * rInv * rInv;
         atom1.force.x += dEdRdR * delta.x;
