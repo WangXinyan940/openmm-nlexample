@@ -139,7 +139,7 @@ extern "C" __global__ void computeNonbonded(
             // instead we can broadcast the values using shuffle
             for (unsigned int j = 0; j < TILE_SIZE; j++) {
                 int atom2 = tbx+j;
-                real4 posq2;
+                real3 posq2;
                 posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
                 real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
                 APPLY_PERIODIC_TO_DELTA(delta)
