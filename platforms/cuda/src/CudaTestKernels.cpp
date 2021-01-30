@@ -130,16 +130,13 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         for (int ii=0;ii<numParticles;ii++){
             exclusions[ii].push_back(ii);
         }
-        cout << "Before init" << endl;
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
-        cout << "After init" << endl;
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
 }
 
 double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
-    cout << "Inside" << endl;
     int numParticles = cu.getNumAtoms();
     double energy = 0.0;
     if (ifPBC){
