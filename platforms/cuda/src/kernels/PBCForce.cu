@@ -1,14 +1,16 @@
 #define WARPS_PER_GROUP (THREAD_BLOCK_SIZE/TILE_SIZE)
 
 typedef struct {
+    int idx;
     real3 pos, force;
     real param;
 } AtomData;
 
-inline __device__ void loadAtomData(AtomData& data, int atom, const real4* __restrict__ posq, real prm) {
+inline __device__ void loadAtomData(AtomData& data, int atom, int index, const real4* __restrict__ posq, real prm) {
     real4 atomPosq = posq[atom];
     data.pos = make_real3(atomPosq.x, atomPosq.y, atomPosq.z);
     data.param = prm;
+    data.idx = index;
 }
 
 __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool hasExclusions, mixed& energy, real4& periodicBoxSize, real4& invPeriodicBoxSize, real4& periodicBoxVecX, real4& periodicBoxVecY, real4& periodicBoxVecZ) {
@@ -20,7 +22,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
         real rInv = RSQRT(r2);
         real r = r2*rInv;
         real p1p2 = atom1.param * atom2.param;
-        printf("%f %f %f\n", atom1.param, atom2.param, r);
+        printf("%i %i %f %f %f\n", atom1.idx, atom2.idx, atom1.param, atom2.param, r);
         energy += p1p2 * rInv * rInv;
         mixed dEdRdR = - 2 * p1p2 * rInv * rInv * rInv * rInv;
         atom1.force.x += dEdRdR * delta.x;
@@ -71,7 +73,7 @@ extern "C" __global__ void calcTestForcePBC(
         AtomData data;
         unsigned int atom1 = x*TILE_SIZE + tgx;
         // !!!!! Here load atom data of atom1 !!!!!
-        loadAtomData(data, atom1, posq, params[atomIndex[atom1]]);
+        loadAtomData(data, atom1, atomIndex[atom1], posq, params[atomIndex[atom1]]);
         data.force = make_real3(0);
         if (x == y) {
             // This tile is on the diagonal.
@@ -140,7 +142,7 @@ extern "C" __global__ void calcTestForcePBC(
             // Load atom data for this tile.
 
             AtomData data;
-            loadAtomData(data, atom1, posq, params[atomIndex[atom1]]);
+            loadAtomData(data, atom1, atomIndex[atom1], posq, params[atomIndex[atom1]]);
             data.force = make_real3(0);
             unsigned int j = interactingAtoms[pos*TILE_SIZE+tgx];
             atomIndices[threadIdx.x] = j;
