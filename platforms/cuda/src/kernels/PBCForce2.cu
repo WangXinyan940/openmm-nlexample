@@ -288,7 +288,7 @@ extern "C" __global__ void computeNonbonded(
             atom1Data.fy = 0.0;
             atom1Data.fz = 0.0;
             atom1Data.prm = params[atomIndex[atom1]];
-            atom1Data.prm = atomIndex[atom1];
+            atom1Data.idx = atomIndex[atom1];
 
             //const unsigned int localAtomIndex = threadIdx.x;
 
