@@ -120,8 +120,10 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
 
         // macro for short-range
-        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
-        calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
+        // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
+        // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
+        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce2, pbcDefines);
+        calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
 
         vector<vector<int>> exclusions;
         exclusions.resize(0);
@@ -141,12 +143,30 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         int startTileIndex = nb.getStartTileIndex();
         int numTileIndices = nb.getNumTiles();
         unsigned int maxTiles = nb.getInteractingTiles().getSize();
-        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
-            &params.getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(),
-            &nb.getExclusionTiles().getDevicePointer(), &startTileIndex, &numTileIndices,
-            &nb.getInteractingTiles().getDevicePointer(), &nb.getInteractionCount().getDevicePointer(), &nb.getInteractingAtoms().getDevicePointer(), &maxTiles,
-            cu.getPeriodicBoxSizePointer(), cu.getInvPeriodicBoxSizePointer(), cu.getPeriodicBoxVecXPointer(), 
-            cu.getPeriodicBoxVecYPointer(), cu.getPeriodicBoxVecZPointer(), &numParticles, &paddedNumAtoms};
+        int maxSinglePairs = nb.getSinglePairs().getSize();
+        void* args[] = {
+            &cu.getForce().getDevicePointer(),                      // forceBuffers    
+            &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
+            &cu.getPosq().getDevicePointer(),                       // posq   
+            &cu.getAtomIndexArray().getDevicePointer(),             // atomInde
+            &nb.getExclusions().getDevicePointer(),                 // exclusion
+            &nb.getExclusionTiles().getDevicePointer(),             // exclusionTiles
+            &startTileIndex,                                        // startTileIndex
+            &numTileIndices,                                        // numTileIndices
+            &nb.getInteractingTiles().getDevicePointer(),           // tiles  
+            &nb.getInteractionCount().getDevicePointer(),           // interactionCount  
+            cu.getPeriodicBoxSizePointer(),                         // periodicBoxSize 
+            cu.getInvPeriodicBoxSizePointer(),                      // invPeriodicBoxSize    
+            cu.getPeriodicBoxVecXPointer(),                         // periodicBoxVecX 
+            cu.getPeriodicBoxVecYPointer(),                         // periodicBoxVecY 
+            cu.getPeriodicBoxVecZPointer(),                         // periodicBoxVecZ 
+            &maxTiles,                                              // maxTiles
+            &nb.getBlockCenters().getDevicePointer(),               // blockCente
+            &nb.getBlockBoundingBoxes().getDevicePointer(),         // blockSize  
+            &nb.getInteractingAtoms().getDevicePointer(),           // interactingAtoms  
+            &maxSinglePairs,                                        // maxSinglePair
+            &nb.getSinglePairs().getDevicePointer()                 // singlePai
+        };
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();

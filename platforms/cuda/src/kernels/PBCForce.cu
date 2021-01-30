@@ -40,6 +40,7 @@ extern "C" __global__ void calcTestForcePBC(
     unsigned long long* __restrict__     forceBuffers,
     real*               __restrict__     params,
     int*                __restrict__     atomIndex,
+    const tileflags*    __restrict__     exclusions,
     const int2*         __restrict__     exclusionTiles, 
     unsigned int                         startTileIndex, 
     unsigned int                         numTileIndices,
