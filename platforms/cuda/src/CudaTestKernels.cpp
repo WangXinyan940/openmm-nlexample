@@ -104,6 +104,13 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pairidx0.upload(idx0);
         pairidx1.upload(idx1);
     } else {
+        vector<vector<int>> exclusions;
+        exclusions.resize(numParticles);
+        for (int ii=0;ii<numParticles;ii++){
+            exclusions[ii].push_back(ii);
+        }
+        cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
+
         map<string, string> pbcDefines;
         pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
         pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
@@ -124,13 +131,6 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
         CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce2, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
-
-        vector<vector<int>> exclusions;
-        exclusions.resize(numParticles);
-        for (int ii=0;ii<numParticles;ii++){
-            exclusions[ii].push_back(ii);
-        }
-        cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
