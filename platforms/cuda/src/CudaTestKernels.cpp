@@ -126,7 +126,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
 
         vector<vector<int>> exclusions;
-        exclusions.resize(0);
+        exclusions.resize(numParticles);
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
