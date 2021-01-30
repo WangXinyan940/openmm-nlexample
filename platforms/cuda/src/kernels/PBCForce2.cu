@@ -415,8 +415,6 @@ extern "C" __global__ void computeNonbonded(
 
         real dEdR = 0.0f;
 
-        real3 dEdR1 = make_real3(0);
-        real3 dEdR2 = make_real3(0);
 
         bool hasExclusions = false;
         bool isExcluded = false;
@@ -428,15 +426,17 @@ extern "C" __global__ void computeNonbonded(
 
         energy += tempEnergy;
 
-        real3 dEdR1 = delta*dEdR;
-        real3 dEdR2 = -dEdR1;
+        delta *= dEdR;
+        force.x -= delta.x;
+        force.y -= delta.y;
+        force.z -= delta.z;
 
-        atomicAdd(&forceBuffers[atom1], static_cast<unsigned long long>((long long) (-dEdR1.x*0x100000000)));
-        atomicAdd(&forceBuffers[atom1+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-dEdR1.y*0x100000000)));
-        atomicAdd(&forceBuffers[atom1+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-dEdR1.z*0x100000000)));
-        atomicAdd(&forceBuffers[atom2], static_cast<unsigned long long>((long long) (-dEdR2.x*0x100000000)));
-        atomicAdd(&forceBuffers[atom2+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-dEdR2.y*0x100000000)));
-        atomicAdd(&forceBuffers[atom2+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-dEdR2.z*0x100000000)));
+        atomicAdd(&forceBuffers[atom1], static_cast<unsigned long long>((long long) (-force.x*0x100000000)));
+        atomicAdd(&forceBuffers[atom1+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-force.y*0x100000000)));
+        atomicAdd(&forceBuffers[atom1+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-force.z*0x100000000)));
+        atomicAdd(&forceBuffers[atom2], static_cast<unsigned long long>((long long) (force.x*0x100000000)));
+        atomicAdd(&forceBuffers[atom2+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (force.y*0x100000000)));
+        atomicAdd(&forceBuffers[atom2+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (force.z*0x100000000)));
     }
 
     energyBuffer[blockIdx.x*blockDim.x+threadIdx.x] += energy;
