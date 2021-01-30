@@ -393,8 +393,10 @@ extern "C" __global__ void computeNonbonded(
     
     // Third loop: single pairs that aren't part of a tile.
     const unsigned int numPairs = interactionCount[1];
-    if (numPairs > maxSinglePairs)
+    if (numPairs > maxSinglePairs) {
+        printf("Out 3\n");
         return; // There wasn't enough memory for the neighbor list.
+    }
     for (int i = blockIdx.x*blockDim.x+threadIdx.x; i < numPairs; i += blockDim.x*gridDim.x) {
         int2 pair = singlePairs[i];
         int atom1 = pair.x;
