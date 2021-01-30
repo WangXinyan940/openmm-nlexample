@@ -132,7 +132,9 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
             tmp.push_back(ii);
             exclusions.push_back(tmp);
         }
+        cout << "Before init" << endl;
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
+        cout << "After init" << endl;
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
