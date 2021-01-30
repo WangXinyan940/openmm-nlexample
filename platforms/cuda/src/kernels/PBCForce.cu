@@ -20,6 +20,7 @@ __device__ void computeOneInteraction(AtomData& atom1, AtomData& atom2, bool has
         real rInv = RSQRT(r2);
         // real r = r2*rInv;
         real p1p2 = atom1.param * atom2.param;
+        printf("%f %f %f\n", p1, p2, rInv);
         energy += p1p2 * rInv * rInv;
         mixed dEdRdR = - 2 * p1p2 * rInv * rInv * rInv * rInv;
         atom1.force.x += dEdRdR * delta.x;
