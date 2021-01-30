@@ -314,11 +314,7 @@ extern "C" __global__ void computeNonbonded(
                 localData[threadIdx.x].x = 0;
                 localData[threadIdx.x].y = 0;
                 localData[threadIdx.x].z = 0;
-                localData[threadIdx.x].fx = 0.0f;
-                localData[threadIdx.x].fy = 0.0f;
-                localData[threadIdx.x].fz = 0.0f;
                 localData[threadIdx.x].prm = 0;
-                localData[threadIdx.x].idx = -100;
             }
 
             // We need to apply periodic boundary conditions separately for each interaction.

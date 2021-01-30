@@ -169,7 +169,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &params.getDevicePointer(),                             // params
             &cutoff                                                 // cutoff
         };
-        cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
+        cu.executeKernel(calcTestForcePBCKernel, args, 2*numParticles);
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
