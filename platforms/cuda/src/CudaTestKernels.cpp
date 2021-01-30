@@ -128,9 +128,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         vector<vector<int>> exclusions;
         exclusions.resize(numParticles);
         for (int ii=0;ii<numParticles;ii++){
-            vector<int> tmp;
-            tmp.push_back(ii);
-            exclusions.push_back(tmp);
+            exclusions[ii].push_back(ii);
         }
         cout << "Before init" << endl;
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
