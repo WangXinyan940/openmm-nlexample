@@ -141,7 +141,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 }
 
 double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces, bool includeEnergy) {
-
+    cout << "Inside" << endl;
     int numParticles = cu.getNumAtoms();
     double energy = 0.0;
     if (ifPBC){
