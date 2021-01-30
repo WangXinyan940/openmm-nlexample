@@ -58,13 +58,6 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
     // Inititalize CUDA objects.
     // if noPBC
     set<pair<int, int>> tilesWithExclusions;
-    // for (int atom1 = 0; atom1 < (int) exclusions.size(); ++atom1) {
-    //     int x = atom1/CudaContext::TileSize;
-    //     for (int atom2 : exclusions[atom1]) {
-    //         int y = atom2/CudaContext::TileSize;
-    //         tilesWithExclusions.insert(make_pair(max(x, y), min(x, y)));
-    //     }
-    // }
     if (cu.getUseDoublePrecision()){
         vector<double> parameters;
         for(int ii=0;ii<numParticles;ii++){
@@ -110,6 +103,14 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
             exclusions[ii].push_back(ii);
         }
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
+
+        for (int atom1 = 0; atom1 < (int) exclusions.size(); ++atom1) {
+            int x = atom1/CudaContext::TileSize;
+            for (int atom2 : exclusions[atom1]) {
+                int y = atom2/CudaContext::TileSize;
+                tilesWithExclusions.insert(make_pair(max(x, y), min(x, y)));
+            }
+        }
 
         map<string, string> pbcDefines;
         pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
