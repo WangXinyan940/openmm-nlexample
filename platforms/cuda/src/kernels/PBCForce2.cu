@@ -91,7 +91,8 @@ extern "C" __global__ void computeNonbonded(
         const real4*            __restrict__   blockSize, 
         const unsigned int*     __restrict__   interactingAtoms, 
         unsigned int                           maxSinglePairs,
-        const int2*             __restrict__   singlePairs
+        const int2*             __restrict__   singlePairs,
+        real*                   __restrict__   params
 ) {
     const unsigned int totalWarps = (blockDim.x*gridDim.x)/TILE_SIZE;
     const unsigned int warp = (blockIdx.x*blockDim.x+threadIdx.x)/TILE_SIZE; // global warpIndex

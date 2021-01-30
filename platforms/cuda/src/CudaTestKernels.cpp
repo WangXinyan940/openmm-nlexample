@@ -165,7 +165,8 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &nb.getBlockBoundingBoxes().getDevicePointer(),         // blockSize  
             &nb.getInteractingAtoms().getDevicePointer(),           // interactingAtoms  
             &maxSinglePairs,                                        // maxSinglePair
-            &nb.getSinglePairs().getDevicePointer()                 // singlePai
+            &nb.getSinglePairs().getDevicePointer(),                // singlePai
+            &params.getDevicePointer()                              // params
         };
         cu.executeKernel(calcTestForcePBCKernel, args, numParticles);
     } else {
