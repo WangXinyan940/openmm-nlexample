@@ -5,6 +5,7 @@ typedef struct {
     real x, y, z;
     real prm;
     real fx, fy, fz;
+    int idx,
 } AtomData;
 
 
@@ -123,6 +124,7 @@ extern "C" __global__ void computeNonbonded(
         atom1Data.fy = 0.0;
         atom1Data.fz = 0.0;
         atom1Data.prm = params[atomIndex[atom1]];
+        atom1Data.idx = atomIndex[atom1];
 
         tileflags excl = exclusions[pos*TILE_SIZE+tgx];
         const bool hasExclusions = true;
@@ -135,6 +137,7 @@ extern "C" __global__ void computeNonbonded(
             localData[threadIdx.x].fy = 0;
             localData[threadIdx.x].fz = 0;
             localData[threadIdx.x].prm = params[atomIndex[atom1]];
+            localData[threadIdx.x].idx = atomIndex[atom1];
 
             // we do not need to fetch parameters from global since this is a symmetric tile
             // instead we can broadcast the values using shuffle
@@ -157,6 +160,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.fz = 0;
                 atom2 = y*TILE_SIZE+j;
                 atom2Data.prm = params[atomIndex[atom2]];
+                atom2Data.idx = atomIndex[atom2];
 
                 real dEdR = 0.0f;
                 bool isExcluded = (atom1 >= NUM_ATOMS || atom2 >= NUM_ATOMS || !(excl & 0x1));
@@ -165,6 +169,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += 0.5f*tempEnergy;
                 force.x -= delta.x*dEdR;
@@ -185,6 +190,7 @@ extern "C" __global__ void computeNonbonded(
             localData[threadIdx.x].fz = 0.0f;
             // LOAD_LOCAL_PARAMETERS_FROM_GLOBAL
             localData[threadIdx.x].prm = params[atomIndex[j]];
+            localData[threadIdx.x].idx = atomIndex[j];
 
             excl = (excl >> tgx) | (excl << (TILE_SIZE - tgx));
             unsigned int tj = tgx;
@@ -206,6 +212,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.fy = 0.0;
                 atom2Data.fz = 0.0;
                 atom2Data.prm = params[atomIndex[atom2]];
+                atom2Data.idx = atimIndex[atom2];
 
                 
                 real dEdR = 0.0f;
@@ -215,6 +222,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -280,6 +288,7 @@ extern "C" __global__ void computeNonbonded(
             atom1Data.fy = 0.0;
             atom1Data.fz = 0.0;
             atom1Data.prm = params[atomIndex[atom1]];
+            atom1Data.prm = atomIndex[atom1];
 
             //const unsigned int localAtomIndex = threadIdx.x;
 
@@ -296,6 +305,7 @@ extern "C" __global__ void computeNonbonded(
                 localData[threadIdx.x].fy = 0.0f;
                 localData[threadIdx.x].fz = 0.0f;
                 localData[threadIdx.x].prm = params[atomIndex[j]];
+                localData[threadIdx.x].idx = atomIndex[j];
             }
             else {
 
@@ -326,6 +336,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.fz = 0.0;
                 atom2 = atomIndices[tbx+tj];
                 atom2Data.prm = params[atomIndex[atom2]];
+                atom2Data.idx = atomIndex[atom2];
 
                 real dEdR = 0.0f;
 
@@ -336,6 +347,7 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
 
@@ -391,6 +403,7 @@ extern "C" __global__ void computeNonbonded(
         atom1Data.fy = 0.0;
         atom1Data.fz = 0.0;
         atom1Data.prm = params[atomIndex[atom1]];
+        atom1Data.idx = atomIndex[atom1];
 
         // int j = atom2;
         // atom2 = threadIdx.x;
@@ -406,6 +419,7 @@ extern "C" __global__ void computeNonbonded(
         atom2Data.fy = 0.0;
         atom2Data.fz = 0.0;
         atom2Data.prm = params[atomIndex[atom2]];
+        atom2Data.idx = atomIndex[atom2];
 
         real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
 
@@ -425,6 +439,7 @@ extern "C" __global__ void computeNonbonded(
         // COMPUTE_INTERACTION
         tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
         dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+        printf("%i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
         energy += tempEnergy;
 
