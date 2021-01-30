@@ -57,11 +57,13 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
             int ii = pair.first;
             int jj = pair.second;
             double p1p2 = params[ii] * params[jj];
+            
             double deltaR[2][ReferenceForce::LastDeltaRIndex];
             ReferenceForce::getDeltaRPeriodic(atomCoordinates[ii], atomCoordinates[jj], periodicBoxVectors, deltaR[0]);
             double r         = deltaR[0][ReferenceForce::RIndex];
             double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
+            cout << ii << " " << jj << " " << params[ii] << params[jj] << r << endl;
             if(includeForces){
                 double dEdRdR = - p1p2 * 2 * inverseR * inverseR * inverseR * inverseR;
                 for(int kk=0;kk<3;kk++){
