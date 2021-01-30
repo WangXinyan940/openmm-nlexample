@@ -163,8 +163,8 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 0.5f;
                 // COMPUTE_INTERACTION
-                tempEnergy += atom1.prm * atom2.prm * invR * invR;
-                dEdR += 2.0 * atom1.prm * atom2.prm * invR * invR * invR * invR;
+                tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
 
                 energy += 0.5f*tempEnergy;
                 force.x -= delta.x*dEdR;
@@ -213,8 +213,8 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 1.0f;
                 // COMPUTE_INTERACTION
-                tempEnergy += atom1.prm * atom2.prm * invR * invR;
-                dEdR += 2.0 * atom1.prm * atom2.prm * invR * invR * invR * invR;
+                tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -334,8 +334,8 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 1.0f;
                 // COMPUTE_INTERACTION
-                tempEnergy += atom1.prm * atom2.prm * invR * invR;
-                dEdR += 2.0 * atom1.prm * atom2.prm * invR * invR * invR * invR;
+                tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
 
                 energy += tempEnergy;
 
@@ -422,8 +422,8 @@ extern "C" __global__ void computeNonbonded(
         real tempEnergy = 0.0f;
         const real interactionScale = 1.0f;
         // COMPUTE_INTERACTION
-        tempEnergy += atom1.prm * atom2.prm * invR * invR;
-        dEdR += 2.0 * atom1.prm * atom2.prm * invR * invR * invR * invR;
+        tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+        dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
 
         energy += tempEnergy;
 
