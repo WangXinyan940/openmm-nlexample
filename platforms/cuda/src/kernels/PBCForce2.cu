@@ -325,51 +325,52 @@ extern "C" __global__ void computeNonbonded(
             unsigned int tj = tgx;
             for (j = 0; j < TILE_SIZE; j++) {
                 int atom2 = tbx+tj;
-                if (atomIndex[atom1] < NUM_ATOMS && atomIndex[atom2] < NUM_ATOMS){
-                    real3 posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
-                    real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
-                    APPLY_PERIODIC_TO_DELTA(delta)
+                real3 posq2 = make_real3(localData[atom2].x, localData[atom2].y, localData[atom2].z);
+                real3 delta = make_real3(posq2.x-posq1.x, posq2.y-posq1.y, posq2.z-posq1.z);
+                APPLY_PERIODIC_TO_DELTA(delta)
 
-                    real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
+                real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
 
-                    if (r2 < CUTOFF_SQUARED) {
-                        real invR = RSQRT(r2);
-                        real r = r2*invR;
-                        // LOAD_ATOM2_PARAMETERS
-                        AtomData atom2Data;
-                        atom2Data.x = posq2.x;
-                        atom2Data.y = posq2.y;
-                        atom2Data.z = posq2.z;
-                        atom2Data.fx = 0.0;
-                        atom2Data.fy = 0.0;
-                        atom2Data.fz = 0.0;
-                        atom2 = atomIndices[tbx+tj];
-                        atom2Data.prm = params[atomIndex[atom2]];
-                        atom2Data.idx = atomIndex[atom2];
+                real invR = RSQRT(r2);
+                real r = r2*invR;
 
-                        real dEdR = 0.0f;
+                atom2 = atomIndices[tbx+tj];
 
-                        bool isExcluded = (atom1 >= NUM_ATOMS || atom2 >= NUM_ATOMS);
+                bool isExcluded = (atom1 >= NUM_ATOMS || atom2 >= NUM_ATOMS);
+                if (!isExcluded && r2 < cutoff2) {
+                    // LOAD_ATOM2_PARAMETERS
+                    AtomData atom2Data;
+                    atom2Data.x = posq2.x;
+                    atom2Data.y = posq2.y;
+                    atom2Data.z = posq2.z;
+                    atom2Data.fx = 0.0;
+                    atom2Data.fy = 0.0;
+                    atom2Data.fz = 0.0;
+                    atom2Data.prm = params[atomIndex[atom2]];
+                    atom2Data.idx = atomIndex[atom2];
 
-                        real tempEnergy = 0.0f;
-                        const real interactionScale = 1.0f;
-                        // COMPUTE_INTERACTION
-                        tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-                        dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                        printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                    real dEdR = 0.0f;
 
-                        energy += tempEnergy;
+                    real tempEnergy = 0.0f;
+                    const real interactionScale = 1.0f;
+                    // COMPUTE_INTERACTION
+                    tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                    dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                    printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
-                        delta *= dEdR;
-                        force.x -= delta.x;
-                        force.y -= delta.y;
-                        force.z -= delta.z;
+                    energy += tempEnergy;
 
-                        localData[tbx+tj].fx += delta.x;
-                        localData[tbx+tj].fy += delta.y;
-                        localData[tbx+tj].fz += delta.z;
-                    }
+                    delta *= dEdR;
+                    force.x -= delta.x;
+                    force.y -= delta.y;
+                    force.z -= delta.z;
+
+                    localData[tbx+tj].fx += delta.x;
+                    localData[tbx+tj].fy += delta.y;
+                    localData[tbx+tj].fz += delta.z;
+                        
                 }
+                    
                 tj = (tj + 1) & (TILE_SIZE - 1);
             }
 
