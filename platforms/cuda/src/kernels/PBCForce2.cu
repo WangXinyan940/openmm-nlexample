@@ -176,7 +176,7 @@ extern "C" __global__ void computeNonbonded(
                     // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
                     COMPUTE_PAIR_ENFORCE;
                 }
-                printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += 0.5f*tempEnergy;
                 force.x -= delta.x*dEdR;
@@ -229,8 +229,10 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
-                COMPUTE_PAIR_ENFORCE;
+                if (!isExcluded && r2 < cutoff2){
+                    COMPUTE_PAIR_ENFORCE;
+                }
+                // printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -359,7 +361,7 @@ extern "C" __global__ void computeNonbonded(
                     // COMPUTE_INTERACTION
                     // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                     // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                    printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                    // printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                     COMPUTE_PAIR_ENFORCE;
 
                     energy += tempEnergy;
@@ -455,8 +457,10 @@ extern "C" __global__ void computeNonbonded(
         // COMPUTE_INTERACTION
         // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
         // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-        printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
-        COMPUTE_PAIR_ENFORCE;
+        // printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+        if (!isExcluded && r2 < cutoff2) {
+            COMPUTE_PAIR_ENFORCE;
+        }
 
         energy += tempEnergy;
 
