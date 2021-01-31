@@ -1,5 +1,7 @@
 #define WARPS_PER_GROUP (THREAD_BLOCK_SIZE/TILE_SIZE)
-
+#define COMPUTE_PAIR_ENFORCE \
+tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;\
+dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR
 
 typedef struct {
     real x, y, z;
@@ -170,8 +172,9 @@ extern "C" __global__ void computeNonbonded(
                 const real interactionScale = 0.5f;
                 // COMPUTE_INTERACTION
                 if (!isExcluded && r2 < cutoff2) {
-                    tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-                    dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                    // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                    // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                    COMPUTE_PAIR_ENFORCE;
                 }
                 // printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
 
@@ -224,9 +227,10 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 1.0f;
                 // COMPUTE_INTERACTION
-                tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-                dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
                 // printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                COMPUTE_PAIR_ENFORCE;
 
                 energy += tempEnergy;
                 delta *= dEdR;
@@ -353,9 +357,10 @@ extern "C" __global__ void computeNonbonded(
                     real tempEnergy = 0.0f;
                     const real interactionScale = 1.0f;
                     // COMPUTE_INTERACTION
-                    tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-                    dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+                    // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+                    // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
                     // printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                    COMPUTE_PAIR_ENFORCE;
 
                     energy += tempEnergy;
 
@@ -448,9 +453,10 @@ extern "C" __global__ void computeNonbonded(
         real tempEnergy = 0.0f;
         const real interactionScale = 1.0f;
         // COMPUTE_INTERACTION
-        tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
-        dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
+        // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
+        // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
         // printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+        COMPUTE_PAIR_ENFORCE;
 
         energy += tempEnergy;
 
