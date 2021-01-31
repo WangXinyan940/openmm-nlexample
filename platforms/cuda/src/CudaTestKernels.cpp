@@ -197,7 +197,8 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &params.getDevicePointer(),                             // params
             &cutoff                                                 // cutoff
         };
-        cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumEnergyBuffers(), nb.getForceThreadBlockSize());
+        cout << nb.getNumForceThreadBlocks() << " | " << nb.getForceThreadBlockSize() << endl;
+        cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {

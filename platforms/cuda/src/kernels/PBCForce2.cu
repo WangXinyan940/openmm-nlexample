@@ -111,7 +111,7 @@ extern "C" __global__ void computeNonbonded(
 
     const unsigned int firstExclusionTile = FIRST_EXCLUSION_TILE+warp*(LAST_EXCLUSION_TILE-FIRST_EXCLUSION_TILE)/totalWarps;
     const unsigned int lastExclusionTile = FIRST_EXCLUSION_TILE+(warp+1)*(LAST_EXCLUSION_TILE-FIRST_EXCLUSION_TILE)/totalWarps;
-    printf("first: %i    last: %i   wrap: %i  ftile: %i   ltile: %i   totalW: %i \n", firstExclusionTile, lastExclusionTile, warp, FIRST_EXCLUSION_TILE, LAST_EXCLUSION_TILE, totalWarps);
+    // printf("first: %i    last: %i   wrap: %i  ftile: %i   ltile: %i   totalW: %i \n", firstExclusionTile, lastExclusionTile, warp, FIRST_EXCLUSION_TILE, LAST_EXCLUSION_TILE, totalWarps);
     for (int pos = firstExclusionTile; pos < lastExclusionTile; pos++) {
         const int2 tileIndices = exclusionTiles[pos];
         const unsigned int x = tileIndices.x;
