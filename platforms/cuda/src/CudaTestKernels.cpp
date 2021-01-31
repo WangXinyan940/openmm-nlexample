@@ -148,6 +148,9 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         int endExclusionIndex = (cu.getContextIndex()+1)*numExclusionTiles/numContexts;
         pbcDefines["FIRST_EXCLUSION_TILE"] = cu.intToString(startExclusionIndex);
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
+        cout << "NUM_TILES_WITH_EXCLUSIONS: " << numExclusionTiles << endl;
+        cout << "FIRST_EXCLUSION_TILE: " << startExclusionIndex << endl;
+        cout << "LAST_EXCLUSION_TILE: " << endExclusionIndex << endl;
 
         // macro for short-range
         // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
