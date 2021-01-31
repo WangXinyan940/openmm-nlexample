@@ -70,7 +70,7 @@ public:
     /**
      * Get exclusion particles. (Not avaliable in Python wrapper)
      */
-    void getExclusionParticles(int index, int& paritcle1, int& particle2);
+    void getExclusionParticles(int index, int& particle1, int& particle2);
     /**
      * Get number of exclusions.
      */
