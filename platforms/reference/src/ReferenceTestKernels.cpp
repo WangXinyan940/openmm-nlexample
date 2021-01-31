@@ -33,6 +33,12 @@ void ReferenceCalcTestForceKernel::initialize(const System& system, const TestFo
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
     exclusions.resize(numParticles);
+    for(int ii=0;ii<force.getNumExclusions();ii++){
+        int p1, p2;
+        force.getExclusionParticles(ii, p1, p2);
+        exclusions[p1].insert(p2);
+        exclusions[p2].insert(p1);
+    }
     if (ifPBC) {
         neighborList = new NeighborList();
     }
@@ -92,6 +98,26 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
                     }
                 }
                 energy += p1p2 * inverseR * inverseR;
+            }
+        }
+        for(int p1=0;p1<numParticles;p1++){
+            for(auto iter=exclusions[p1].begin(); iter != exclusions[p1].end(); iter++){
+                int p2 = *iter;
+                double p1p2 = params[p1] * params[p2];
+                double deltaR[2][ReferenceForce::LastDeltaRIndex];
+                ReferenceForce::getDeltaR(atomCoordinates[p1], atomCoordinates[p2], deltaR[0]);
+                double r         = deltaR[0][ReferenceForce::RIndex];
+                double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
+
+                if(includeForces){
+                    double dEdRdR = - 2 * p1p2 * inverseR * inverseR * inverseR * inverseR;
+                    for(int kk=0;kk<3;kk++){
+                        double fconst = dEdRdR*deltaR[0][kk];
+                        forces[p1][kk] -= fconst;
+                        forces[p2][kk] += fconst;
+                    }
+                }
+                energy -= p1p2 * inverseR * inverseR;
             }
         }
     }

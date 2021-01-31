@@ -58,6 +58,8 @@ public:
     void setCutoffDistance(double cutoff);
     bool usesPeriodicBoundaryConditions() const;
     void setUsesPeriodicBoundaryConditions(bool ifPeriod);
+    void addExclusion(int particle1, int particle2);
+    int getNumExclusions() const;
     /*
      * Add methods for casting a Force to a TestForce.
     */

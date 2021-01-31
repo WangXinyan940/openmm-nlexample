@@ -45,6 +45,21 @@ void TestForce::setUsesPeriodicBoundaryConditions(bool ifPeriod){
     ifPBC = ifPeriod;
 }
 
+void TestForce::addExclusion(int particle1, int particle2){
+    pair<int,int> tmp;
+    tmp.first = particle1;
+    tmp.second = particle2;
+    exclusions.push_back(tmp);
+}
+
+void TestForce::getExclusionParticles(int index, int& paritcle1, int& particle2){
+    particle1 = exclusions[index].first;
+    particle2 = exclusions[index].second;
+}
+
+int TestForce::getNumExclusions() const {
+    return exclusions.size();
+}
 
 ForceImpl* TestForce::createImpl() const {
     return new TestForceImpl(*this);

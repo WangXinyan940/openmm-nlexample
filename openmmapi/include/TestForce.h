@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <set>
 
 namespace TestPlugin {
 
@@ -62,6 +63,18 @@ public:
      * @param ifPeriod     if use PBC
      */
     void setUsesPeriodicBoundaryConditions(bool ifPeriod);
+    /**
+     * Add exclusion pair.
+     */
+    void addExclusion(int particle1, int particle2);
+    /**
+     * Get exclusion particles. (Not avaliable in Python wrapper)
+     */
+    void getExclusionParticles(int index, int& paritcle1, int& particle2);
+    /**
+     * Get number of exclusions.
+     */
+    int getNumExclusions() const; 
 
 protected:
     OpenMM::ForceImpl* createImpl() const;
@@ -69,6 +82,7 @@ private:
     double cutoffDistance;
     bool ifPBC;
     std::vector<double> params;
+    std::vector<std::pair<int,int>> exclusions;
 };
 
 } // namespace TestPlugin

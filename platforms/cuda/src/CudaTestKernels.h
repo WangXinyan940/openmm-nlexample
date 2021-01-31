@@ -40,8 +40,12 @@ private:
     OpenMM::CudaContext& cu;
     CUfunction calcTestForcePBCKernel;
     CUfunction calcTestForceNoPBCKernel;
+    CUfunction calcExcludeForceNoPBCKernel;
     OpenMM::CudaArray pairidx0, pairidx1;
+    OpenMM::CudaArray expairidx0, expairidx1;
     OpenMM::CudaArray params;
+    std::vector<std::vector<int>> exclusions;
+    int numexclusions;
     double cutoff;
     bool ifPBC;
 };

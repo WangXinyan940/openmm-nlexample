@@ -55,6 +55,15 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
     ifPBC = force.usesPeriodicBoundaryConditions();
     cutoff = force.getCutoffDistance();
 
+    // vector<vector<int>> exclusions;
+    exclusions.resize(numParticles);
+    for(int ii=0;ii<force.getNumExclusions();ii++){
+        int p1, p2;
+        force.getExclusionParticles(ii, p1, p2);
+        exclusions[p1].push_back(p2);
+        exclusions[p2].push_back(p1);
+    }
+
     // Inititalize CUDA objects.
     // if noPBC
     if (cu.getUseDoublePrecision()){
@@ -79,6 +88,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         map<string, string> defines;
         CUmodule module = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::noPBCForce, defines);
         calcTestForceNoPBCKernel = cu.getKernel(module, "calcTestForceNoPBC");
+        calcExcludeForceNoPBCKernel = cu.getKernel(module, "calcExcludeForceNoPBC");
         vector<int> idx0;
         vector<int> idx1;
         idx0.resize(numParticles*(numParticles-1)/2);
@@ -95,12 +105,24 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pairidx1.initialize(cu, numParticles*(numParticles-1)/2, sizeof(int), "index1");
         pairidx0.upload(idx0);
         pairidx1.upload(idx1);
-    } else {
-        vector<vector<int>> exclusions;
-        exclusions.resize(numParticles);
-        for (int ii=0;ii<numParticles;ii++){
-            exclusions[ii].push_back(ii);
+
+        vector<int> exidx0, exidx1;
+        exidx0.resize(force.getNumExclusions());
+        exidx1.resize(force.getNumExclusions());
+        for(int ii=0;ii<force.getNumExclusions();ii++){
+            int p1, p2;
+            force.getExclusionParticles(ii, p1, p2);
+            exidx0[ii] = p1;
+            exidx1[ii] = p2;
         }
+        expairidx0.initialize(cu, exidx0.size(), sizeof(int), "exindex0");
+        expairidx1.initialize(cu, exidx1.size(), sizeof(int), "exindex1");
+        expairidx0.upload(exidx0);
+        expairidx1.upload(exidx1);
+        numexclusions = exidx0.size();
+
+    } else {
+
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
 
         set<pair<int, int>> tilesWithExclusions;
@@ -175,10 +197,31 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumEnergyBuffers(), nb.getForceThreadBlockSize());
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
-        void* args[] = {&cu.getEnergyBuffer().getDevicePointer(), &cu.getPosq().getDevicePointer(), &cu.getForce().getDevicePointer(), 
-            &params.getDevicePointer(), &cu.getAtomIndexArray().getDevicePointer(),
-            &pairidx0.getDevicePointer(), &pairidx1.getDevicePointer(), &numParticles, &paddedNumAtoms};
+        void* args[] = {
+            &cu.getEnergyBuffer().getDevicePointer(), 
+            &cu.getPosq().getDevicePointer(), 
+            &cu.getForce().getDevicePointer(), 
+            &params.getDevicePointer(), 
+            &cu.getAtomIndexArray().getDevicePointer(),
+            &pairidx0.getDevicePointer(), 
+            &pairidx1.getDevicePointer(), 
+            &numParticles, &paddedNumAtoms
+        };
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
+
+        void* args[] = {
+            &cu.getEnergyBuffer().getDevicePointer(), 
+            &cu.getPosq().getDevicePointer(), 
+            &cu.getForce().getDevicePointer(), 
+            &params.getDevicePointer(), 
+            &cu.getAtomIndexArray().getDevicePointer(),
+            &expairidx0.getDevicePointer(), 
+            &expairidx1.getDevicePointer(), 
+            &numexclusions, 
+            &numParticles, 
+            &paddedNumAtoms
+        };
+        cu.executeKernel(calcExcludeForceNoPBCKernel, args, numexclusions);
     }
     return energy;
 }
