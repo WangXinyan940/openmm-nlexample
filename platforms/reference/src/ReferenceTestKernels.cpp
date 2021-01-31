@@ -103,22 +103,23 @@ double ReferenceCalcTestForceKernel::execute(ContextImpl& context, bool includeF
         for(int p1=0;p1<numParticles;p1++){
             for(set<int>::iterator iter=exclusions[p1].begin(); iter != exclusions[p1].end(); iter++){
                 int p2 = *iter;
-                cout << p1 << " " << p2 << endl;
-                double p1p2 = params[p1] * params[p2];
-                double deltaR[2][ReferenceForce::LastDeltaRIndex];
-                ReferenceForce::getDeltaR(atomCoordinates[p1], atomCoordinates[p2], deltaR[0]);
-                double r         = deltaR[0][ReferenceForce::RIndex];
-                double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
+                if (p1 < p2) {
+                    double p1p2 = params[p1] * params[p2];
+                    double deltaR[2][ReferenceForce::LastDeltaRIndex];
+                    ReferenceForce::getDeltaR(atomCoordinates[p1], atomCoordinates[p2], deltaR[0]);
+                    double r         = deltaR[0][ReferenceForce::RIndex];
+                    double inverseR  = 1.0/(deltaR[0][ReferenceForce::RIndex]);
 
-                if(includeForces){
-                    double dEdRdR = - 2 * p1p2 * inverseR * inverseR * inverseR * inverseR;
-                    for(int kk=0;kk<3;kk++){
-                        double fconst = dEdRdR*deltaR[0][kk];
-                        forces[p1][kk] -= fconst;
-                        forces[p2][kk] += fconst;
+                    if(includeForces){
+                        double dEdRdR = - 2 * p1p2 * inverseR * inverseR * inverseR * inverseR;
+                        for(int kk=0;kk<3;kk++){
+                            double fconst = dEdRdR*deltaR[0][kk];
+                            forces[p1][kk] -= fconst;
+                            forces[p2][kk] += fconst;
+                        }
                     }
+                    energy -= p1p2 * inverseR * inverseR;
                 }
-                energy -= p1p2 * inverseR * inverseR;
             }
         }
     }
