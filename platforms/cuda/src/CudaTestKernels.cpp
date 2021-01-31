@@ -57,7 +57,6 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 
     // Inititalize CUDA objects.
     // if noPBC
-    set<pair<int, int>> tilesWithExclusions;
     if (cu.getUseDoublePrecision()){
         vector<double> parameters;
         for(int ii=0;ii<numParticles;ii++){
@@ -104,6 +103,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         }
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
 
+        set<pair<int, int>> tilesWithExclusions;
         for (int atom1 = 0; atom1 < (int) exclusions.size(); ++atom1) {
             int x = atom1/CudaContext::TileSize;
             for (int atom2 : exclusions[atom1]) {
