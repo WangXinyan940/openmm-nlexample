@@ -209,7 +209,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         };
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
 
-        void* args[] = {
+        void* args2[] = {
             &cu.getEnergyBuffer().getDevicePointer(), 
             &cu.getPosq().getDevicePointer(), 
             &cu.getForce().getDevicePointer(), 
@@ -221,7 +221,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &numParticles, 
             &paddedNumAtoms
         };
-        cu.executeKernel(calcExcludeForceNoPBCKernel, args, numexclusions);
+        cu.executeKernel(calcExcludeForceNoPBCKernel, args2, numexclusions);
     }
     return energy;
 }
