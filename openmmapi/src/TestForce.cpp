@@ -52,7 +52,7 @@ void TestForce::addExclusion(int particle1, int particle2){
     exclusions.push_back(tmp);
 }
 
-void TestForce::getExclusionParticles(int index, int& particle1, int& particle2){
+void TestForce::getExclusionParticles(int index, int& particle1, int& particle2) const {
     particle1 = exclusions[index].first;
     particle2 = exclusions[index].second;
 }
