@@ -57,6 +57,9 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
 
     // vector<vector<int>> exclusions;
     exclusions.resize(numParticles);
+    for(int ii=0;ii<numParticles;ii++){
+        exclusions[ii].push_back(ii);
+    }
     for(int ii=0;ii<force.getNumExclusions();ii++){
         int p1, p2;
         force.getExclusionParticles(ii, p1, p2);
