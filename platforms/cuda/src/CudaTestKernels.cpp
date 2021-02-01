@@ -144,16 +144,17 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["THREAD_BLOCK_SIZE"] = cu.intToString(cu.getNonbondedUtilities().getForceThreadBlockSize());
 
         pbcDefines["TILE_SIZE"] = cu.intToString(CudaContext::TileSize);
+        cout << "TILE_SIZE " << pbcDefines["TILE_SIZE"] << endl;
         int numExclusionTiles = tilesWithExclusions.size();
         pbcDefines["NUM_TILES_WITH_EXCLUSIONS"] = cu.intToString(numExclusionTiles);
+        cout << "NUM_TILES_WITH_EXCLUSIONS " << pbcDefines["NUM_TILES_WITH_EXCLUSIONS"] << endl;
         int numContexts = cu.getPlatformData().contexts.size();
         int startExclusionIndex = cu.getContextIndex()*numExclusionTiles/numContexts;
         int endExclusionIndex = (cu.getContextIndex()+1)*numExclusionTiles/numContexts;
         pbcDefines["FIRST_EXCLUSION_TILE"] = cu.intToString(startExclusionIndex);
+        cout << "FIRST_EXCLUSION_TILE " << pbcDefines["FIRST_EXCLUSION_TILE"] << endl;
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
-        cout << "NUM_TILES_WITH_EXCLUSIONS: " << numExclusionTiles << endl;
-        cout << "FIRST_EXCLUSION_TILE: " << startExclusionIndex << endl;
-        cout << "LAST_EXCLUSION_TILE: " << endExclusionIndex << endl;
+        cout << "LAST_EXCLUSION_TILE " << pbcDefines["LAST_EXCLUSION_TILE"] << endl;
 
         // macro for short-range
         // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
