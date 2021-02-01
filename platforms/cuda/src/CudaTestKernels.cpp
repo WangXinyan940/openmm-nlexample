@@ -180,6 +180,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         cout << "numTileIndices " << numTileIndices << endl;
         cout << "maxTiles " << maxTiles << endl;
         cout << "maxSinglePairs " << maxSinglePairs << endl;
+        cout << "ex size " << nb.getExclusions().getSize() << endl;
         void* args[] = {
             &cu.getForce().getDevicePointer(),                      // forceBuffers    
             &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
