@@ -176,11 +176,15 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         int numTileIndices = nb.getNumTiles();
         unsigned int maxTiles = nb.getInteractingTiles().getSize();
         int maxSinglePairs = nb.getSinglePairs().getSize();
+        cout << "startTileIndex " << startTileIndex << endl;
+        cout << "numTileIndices " << numTileIndices << endl;
+        cout << "maxTiles " << maxTiles << endl;
+        cout << "maxSinglePairs " << maxSinglePairs << endl;
         void* args[] = {
             &cu.getForce().getDevicePointer(),                      // forceBuffers    
             &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
             &cu.getPosq().getDevicePointer(),                       // posq   
-            &cu.getAtomIndexArray().getDevicePointer(),             // atomInde
+            &cu.getAtomIndexArray().getDevicePointer(),             // atomIndex
             &nb.getExclusions().getDevicePointer(),                 // exclusion
             &nb.getExclusionTiles().getDevicePointer(),             // exclusionTiles
             &startTileIndex,                                        // startTileIndex
