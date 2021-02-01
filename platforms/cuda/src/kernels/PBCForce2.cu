@@ -172,11 +172,11 @@ extern "C" __global__ void computeNonbonded(
                 real tempEnergy = 0.0f;
                 const real interactionScale = 0.5f;
                 // COMPUTE_INTERACTION
-                printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                 if (!isExcluded && r2 < cutoff2) {
                     // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                     // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                    // 
+                    printf("1: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                     COMPUTE_PAIR_ENFORCE;
                 }
                 // 
@@ -232,9 +232,9 @@ extern "C" __global__ void computeNonbonded(
                 // COMPUTE_INTERACTION
                 // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                 // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                 if (!isExcluded && r2 < cutoff2){
-                    // 
+                    printf("2: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                     COMPUTE_PAIR_ENFORCE;
                 }
                 // 
@@ -359,7 +359,7 @@ extern "C" __global__ void computeNonbonded(
                 atom2Data.prm = params[atomIndex[atom2]];
                 atom2Data.idx = atomIndex[atom2];
 
-                printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+                // printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                 if (!isExcluded && r2 < cutoff2) {
                     real dEdR = 0.0f;
 
@@ -368,7 +368,7 @@ extern "C" __global__ void computeNonbonded(
                     // COMPUTE_INTERACTION
                     // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
                     // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-                    // 
+                    printf("3: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
                     COMPUTE_PAIR_ENFORCE;
 
                     energy += tempEnergy;
@@ -456,7 +456,7 @@ extern "C" __global__ void computeNonbonded(
 
         real dEdR = 0.0f;
 
-        printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
+        // printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
         
         bool hasExclusions = false;
         bool isExcluded = false;
@@ -465,9 +465,9 @@ extern "C" __global__ void computeNonbonded(
         // COMPUTE_INTERACTION
         // tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;
         // dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR;
-        // 
+        
         if (!isExcluded && r2 < cutoff2) {
-            // 
+            printf("4: %i %i %f %f %f\n", atom1Data.idx, atom2Data.idx, atom1Data.prm, atom2Data.prm, r);
             COMPUTE_PAIR_ENFORCE;
         }
 
