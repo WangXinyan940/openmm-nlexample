@@ -183,6 +183,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         cout << "ex size " << nb.getExclusions().getSize() << endl;
 
         vector<tileflags> exVec;
+        exVec.resize(nb.getExclusionTiles().getSize());
         nb.getExclusionTiles().download(exVec);
         cout << "Ex Vec:" << endl;
         for(int ii=0;ii<exVec.size();ii++){
