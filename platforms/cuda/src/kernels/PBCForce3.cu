@@ -396,6 +396,7 @@ extern "C" __global__ void computeNonbonded(
             }
 #ifdef USE_PERIODIC
             if (singlePeriodicCopy) {
+                printf("True\n");
                 // The box is small enough that we can just translate all the atoms into a single periodic
                 // box, then skip having to apply periodic boundary conditions later.
                 real4 blockCenterX = blockCenter[x];
