@@ -171,7 +171,8 @@ extern "C" __global__ void computeNonbonded(
 #endif
                 real tempEnergy = 0.0f;
                 const real interactionScale = 0.5f;
-                if (!isExcluded and r2 < cutoff2){
+                if (!isExcluded && r2 < cutoff2){
+                    printf("1:\n");
                     COMPUTE_INTERACTION;
                 }
                 energy += 0.5f*tempEnergy;
@@ -242,7 +243,8 @@ extern "C" __global__ void computeNonbonded(
 #endif
                 real tempEnergy = 0.0f;
                 const real interactionScale = 1.0f;
-                if (!isExcluded and r2 < cutoff2){
+                if (!isExcluded && r2 < cutoff2){
+                    printf("2:\n");
                     COMPUTE_INTERACTION;
                 }
                 energy += tempEnergy;
@@ -396,7 +398,6 @@ extern "C" __global__ void computeNonbonded(
             }
 #ifdef USE_PERIODIC
             if (singlePeriodicCopy) {
-                printf("True\n");
                 // The box is small enough that we can just translate all the atoms into a single periodic
                 // box, then skip having to apply periodic boundary conditions later.
                 real4 blockCenterX = blockCenter[x];
@@ -435,7 +436,8 @@ extern "C" __global__ void computeNonbonded(
                     real tempEnergy = 0.0f;
                     const real interactionScale = 1.0f;
 
-                    if (!isExcluded){
+                    if (!isExcluded && r2 < cutoff2){
+                        printf("3:\n");
                         COMPUTE_INTERACTION;
                     }
                     
@@ -503,7 +505,8 @@ extern "C" __global__ void computeNonbonded(
                     real tempEnergy = 0.0f;
                     const real interactionScale = 1.0f;
 
-                    if (!isExcluded){
+                    if (!isExcluded && r2 < cutoff2){
+                        printf("4:\n");
                         COMPUTE_INTERACTION;
                     }
                     
@@ -606,7 +609,8 @@ extern "C" __global__ void computeNonbonded(
         real tempEnergy = 0.0f;
         const real interactionScale = 1.0f;
 
-        if (!isExcluded){
+        if (!isExcluded && r2 < cutoff2){
+            printf("5:\n");
             COMPUTE_INTERACTION;
         }
         
