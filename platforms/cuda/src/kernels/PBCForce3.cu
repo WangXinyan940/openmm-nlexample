@@ -570,7 +570,7 @@ extern "C" __global__ void computeNonbonded(
         real4 posq2 = posq[atom2];
 
         // LOAD_ATOM1_PARAMETERS
-        AtomData atomData2;
+        AtomData atomData1;
         atomData1.x = posq1.x;
         atomData1.y = posq1.y;
         atomData1.z = posq1.z;
