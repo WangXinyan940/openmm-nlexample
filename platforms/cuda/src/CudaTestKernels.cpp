@@ -166,7 +166,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         // macro for short-range
         // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
-        CUmodule PBCModule = cu.createModule(CudaTestKernelSources::PBCForce3, pbcDefines);
+        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce3, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
