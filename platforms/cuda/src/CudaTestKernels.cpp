@@ -249,7 +249,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &nb.getInteractingAtoms().getDevicePointer(),           // const unsigned int*       __restrict__     interactingAtom
             &maxSinglePairs,                                        // unsigned int                               maxSinglePairs,
             &nb.getSinglePairs().getDevicePointer()                // const int2*               __restrict__     singlePairs
-        }
+        };
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
 
     } else {
