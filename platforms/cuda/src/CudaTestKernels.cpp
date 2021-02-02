@@ -155,11 +155,18 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         cout << "FIRST_EXCLUSION_TILE " << pbcDefines["FIRST_EXCLUSION_TILE"] << endl;
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
         cout << "LAST_EXCLUSION_TILE " << pbcDefines["LAST_EXCLUSION_TILE"] << endl;
+        pbcDefines["USE_PERIODIC"] = "1";
+        pbcDefines["USE_CUTOFF"] = "1";
+        pbcDefines["USE_EXCLUSIONS"] = "1";
+        pbcDefines["USE_SYMMETRIC"] = "1";
+        pbcDefines["INCLUDE_FORCES"] = "1";
+        pbcDefines["INCLUDE_ENERGY"] = "1";
+        pbcDefines["CUTOFF"] = cu.doubleToString(cutoff);
 
         // macro for short-range
         // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
-        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce2, pbcDefines);
+        CUmodule PBCModule = cu.createModule(CudaTestKernelSources::PBCForce3, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
@@ -182,42 +189,69 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         cout << "maxSinglePairs " << maxSinglePairs << endl;
         cout << "ex size " << nb.getExclusions().getSize() << endl;
 
-        vector<tileflags> exVec;
-        exVec.resize(nb.getExclusionTiles().getSize());
-        nb.getExclusions().download(exVec);
-        cout << "Ex Vec:" << endl;
-        for(int ii=0;ii<exVec.size();ii++){
-            cout << exVec[ii] << " ";
-        }
-        cout << endl;
+        // vector<tileflags> exVec;
+        // exVec.resize(nb.getExclusionTiles().getSize());
+        // nb.getExclusions().download(exVec);
+        // cout << "Ex Vec:" << endl;
+        // for(int ii=0;ii<exVec.size();ii++){
+        //     cout << exVec[ii] << " ";
+        // }
+        // cout << endl;
 
-        void* args[] = {
-            &cu.getForce().getDevicePointer(),                      // forceBuffers    
-            &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
-            &cu.getPosq().getDevicePointer(),                       // posq   
-            &cu.getAtomIndexArray().getDevicePointer(),             // atomIndex
-            &nb.getExclusions().getDevicePointer(),                 // exclusion
-            &nb.getExclusionTiles().getDevicePointer(),             // exclusionTiles
-            &startTileIndex,                                        // startTileIndex
-            &numTileIndices,                                        // numTileIndices
-            &nb.getInteractingTiles().getDevicePointer(),           // tiles  
-            &nb.getInteractionCount().getDevicePointer(),           // interactionCount  
-            cu.getPeriodicBoxSizePointer(),                         // periodicBoxSize 
-            cu.getInvPeriodicBoxSizePointer(),                      // invPeriodicBoxSize    
-            cu.getPeriodicBoxVecXPointer(),                         // periodicBoxVecX 
-            cu.getPeriodicBoxVecYPointer(),                         // periodicBoxVecY 
-            cu.getPeriodicBoxVecZPointer(),                         // periodicBoxVecZ 
-            &maxTiles,                                              // maxTiles
-            &nb.getBlockCenters().getDevicePointer(),               // blockCente
-            &nb.getBlockBoundingBoxes().getDevicePointer(),         // blockSize  
-            &nb.getInteractingAtoms().getDevicePointer(),           // interactingAtoms  
-            &maxSinglePairs,                                        // maxSinglePair
-            &nb.getSinglePairs().getDevicePointer(),                // singlePai
-            &params.getDevicePointer(),                             // params
-            &cutoff                                                 // cutoff
-        };
-        cout << nb.getNumForceThreadBlocks() << " | " << nb.getForceThreadBlockSize() << endl;
+        // void* args[] = {
+        //     &cu.getForce().getDevicePointer(),                      // forceBuffers    
+        //     &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
+        //     &cu.getPosq().getDevicePointer(),                       // posq   
+        //     &cu.getAtomIndexArray().getDevicePointer(),             // atomIndex
+        //     &nb.getExclusions().getDevicePointer(),                 // exclusion
+        //     &nb.getExclusionTiles().getDevicePointer(),             // exclusionTiles
+        //     &startTileIndex,                                        // startTileIndex
+        //     &numTileIndices,                                        // numTileIndices
+        //     &nb.getInteractingTiles().getDevicePointer(),           // tiles  
+        //     &nb.getInteractionCount().getDevicePointer(),           // interactionCount  
+        //     cu.getPeriodicBoxSizePointer(),                         // periodicBoxSize 
+        //     cu.getInvPeriodicBoxSizePointer(),                      // invPeriodicBoxSize    
+        //     cu.getPeriodicBoxVecXPointer(),                         // periodicBoxVecX 
+        //     cu.getPeriodicBoxVecYPointer(),                         // periodicBoxVecY 
+        //     cu.getPeriodicBoxVecZPointer(),                         // periodicBoxVecZ 
+        //     &maxTiles,                                              // maxTiles
+        //     &nb.getBlockCenters().getDevicePointer(),               // blockCente
+        //     &nb.getBlockBoundingBoxes().getDevicePointer(),         // blockSize  
+        //     &nb.getInteractingAtoms().getDevicePointer(),           // interactingAtoms  
+        //     &maxSinglePairs,                                        // maxSinglePair
+        //     &nb.getSinglePairs().getDevicePointer(),                // singlePai
+        //     &params.getDevicePointer(),                             // params
+        //     &cutoff                                                 // cutoff
+        // };
+        // cout << nb.getNumForceThreadBlocks() << " | " << nb.getForceThreadBlockSize() << endl;
+        // cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
+
+        void* arg[] = {
+            &cu.getForce().getDevicePointer(),                      // unsigned long long*       __restrict__     forceBuffers, 
+            &cu.getEnergyBuffer().getDevicePointer(),               // mixed*                    __restrict__     energyBuffer, 
+            &cu.getPosq().getDevicePointer(),                       // const real4*              __restrict__     posq, 
+            &params.getDevicePointer(),                             // const real*               __restrict__     params,
+            &cu.getAtomIndexArray().getDevicePointer(),             // const int*                __restrict__     atomIndex,
+            &nb.getExclusions().getDevicePointer(),                 // const tileflags*          __restrict__     exclusions,
+            &nb.getExclusionTiles().getDevicePointer(),             // const int2*               __restrict__     exclusionTiles,
+            &startTileIndex,                                        // unsigned int                               startTileIndex,
+            &numTileIndices,                                        // unsigned long long                         numTileIndices,
+            &nb.getInteractingTiles().getDevicePointer(),           // const int*                __restrict__     tiles, 
+            &nb.getInteractionCount().getDevicePointer(),           // const unsigned int*       __restrict__     interactionCoun
+            cu.getPeriodicBoxSizePointer(),                         // real4                                      periodicBoxSize
+            cu.getInvPeriodicBoxSizePointer(),                      // real4                                      invPeriodicBoxS
+            cu.getPeriodicBoxVecXPointer(),                         // real4                                      periodicBoxVecX
+            cu.getPeriodicBoxVecYPointer(),                         // real4                                      periodicBoxVecY
+            cu.getPeriodicBoxVecZPointer(),                         // real4                                      periodicBoxVecZ
+            &maxTiles,                                              // unsigned int                               maxTiles, 
+            &nb.getBlockCenters().getDevicePointer(),               // const real4*              __restrict__     blockCenter,
+            &nb.getBlockBoundingBoxes().getDevicePointer(),         // const real4*              __restrict__     blockSize, 
+            &nb.getInteractingAtoms().getDevicePointer(),           // const unsigned int*       __restrict__     interactingAtom
+            &maxSinglePairs,                                        // unsigned int                               maxSinglePairs,
+            &nb.getSinglePairs().getDevicePointer()                // const int2*               __restrict__     singlePairs
+        }
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
+
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {
