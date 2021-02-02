@@ -226,7 +226,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         // cout << nb.getNumForceThreadBlocks() << " | " << nb.getForceThreadBlockSize() << endl;
         // cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
 
-        void* arg[] = {
+        void* args[] = {
             &cu.getForce().getDevicePointer(),                      // unsigned long long*       __restrict__     forceBuffers, 
             &cu.getEnergyBuffer().getDevicePointer(),               // mixed*                    __restrict__     energyBuffer, 
             &cu.getPosq().getDevicePointer(),                       // const real4*              __restrict__     posq, 
