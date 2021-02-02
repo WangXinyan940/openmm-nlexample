@@ -327,9 +327,9 @@ extern "C" __global__ void computeNonbonded(
 #ifdef USE_CUTOFF
         x = tiles[pos];
         real4 blockSizeX = blockSize[x];
-        singlePeriodicCopy = (0.5f*periodicBoxSize.x-blockSizeX.x >= MAX_CUTOFF &&
-                              0.5f*periodicBoxSize.y-blockSizeX.y >= MAX_CUTOFF &&
-                              0.5f*periodicBoxSize.z-blockSizeX.z >= MAX_CUTOFF);
+        singlePeriodicCopy = (0.5f*periodicBoxSize.x-blockSizeX.x >= CUTOFF &&
+                              0.5f*periodicBoxSize.y-blockSizeX.y >= CUTOFF &&
+                              0.5f*periodicBoxSize.z-blockSizeX.z >= CUTOFF);
 #else
         y = (int) floor(NUM_BLOCKS+0.5f-SQRT((NUM_BLOCKS+0.5f)*(NUM_BLOCKS+0.5f)-2*pos));
         x = (pos-y*NUM_BLOCKS+y*(y+1)/2);
