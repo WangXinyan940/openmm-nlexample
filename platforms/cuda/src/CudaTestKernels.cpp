@@ -157,7 +157,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         cout << "LAST_EXCLUSION_TILE " << pbcDefines["LAST_EXCLUSION_TILE"] << endl;
         pbcDefines["USE_PERIODIC"] = "1";
         pbcDefines["USE_CUTOFF"] = "1";
-        pbcDefines["USE_EXCLUSIONS"] = "1";
+        pbcDefines["USE_EXCLUSIONS"] = "";
         pbcDefines["USE_SYMMETRIC"] = "1";
         pbcDefines["INCLUDE_FORCES"] = "1";
         pbcDefines["INCLUDE_ENERGY"] = "1";
@@ -166,7 +166,7 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         // macro for short-range
         // CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
-        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce3, pbcDefines);
+        CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
