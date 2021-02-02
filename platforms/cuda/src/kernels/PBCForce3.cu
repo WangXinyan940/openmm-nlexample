@@ -1,8 +1,8 @@
 #define WARPS_PER_GROUP (THREAD_BLOCK_SIZE/TILE_SIZE)
 
 #define COMPUTE_INTERACTION \
-tempEnergy += atom1Data.prm * atom2Data.prm * invR * invR;\
-dEdR += 2.0 * atom1Data.prm * atom2Data.prm * invR * invR * invR * invR
+tempEnergy += atomData1.prm * atomData2.prm * invR * invR;\
+dEdR += 2.0 * atomData1.prm * atomData2.prm * invR * invR * invR * invR
 
 typedef struct {
     real x, y, z, q;
