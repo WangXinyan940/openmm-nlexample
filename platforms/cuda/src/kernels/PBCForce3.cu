@@ -121,9 +121,9 @@ extern "C" __global__ void computeNonbonded(
         
         // LOAD_ATOM1_PARAMETERS
         AtomData atomData1;
-        atomData1.x = pos1q.x;
-        atomData1.y = pos1q.y;
-        atomData1.z = pos1q.z;
+        atomData1.x = posq1.x;
+        atomData1.y = posq1.y;
+        atomData1.z = posq1.z;
         atomData1.prm = params[atomIndex[atom1]];
 
 #ifdef USE_EXCLUSIONS
@@ -154,9 +154,9 @@ extern "C" __global__ void computeNonbonded(
                 
                 // LOAD_ATOM2_PARAMETERS
                 AtomData atomData2;
-                atomData2.x = pos2q.x;
-                atomData2.y = pos2q.y;
-                atomData2.z = pos2q.z;
+                atomData2.x = posq2.x;
+                atomData2.y = posq2.y;
+                atomData2.z = posq2.z;
                 atomData2.prm = localData[atom2].prm;
 
                 atom2 = y*TILE_SIZE+j;
@@ -225,9 +225,9 @@ extern "C" __global__ void computeNonbonded(
                 
                 // LOAD_ATOM2_PARAMETERS
                 AtomData atomData2;
-                atomData2.x = pos2q.x;
-                atomData2.y = pos2q.y;
-                atomData2.z = pos2q.z;
+                atomData2.x = posq2.x;
+                atomData2.y = posq2.y;
+                atomData2.z = posq2.z;
                 atomData2.prm = localData[atom2].prm;
 
                 atom2 = y*TILE_SIZE+tj;
@@ -361,9 +361,9 @@ extern "C" __global__ void computeNonbonded(
 
             // LOAD_ATOM1_PARAMETERS
             AtomData atomData1;
-            atomData1.x = pos1q.x;
-            atomData1.y = pos1q.y;
-            atomData1.z = pos1q.z;
+            atomData1.x = posq1.x;
+            atomData1.y = posq1.y;
+            atomData1.z = posq1.z;
             atomData1.prm = params[atomIndex[atom1]];
 
             //const unsigned int localAtomIndex = threadIdx.x;
