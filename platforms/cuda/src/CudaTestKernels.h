@@ -41,6 +41,8 @@ private:
     CUfunction calcTestForcePBCKernel;
     CUfunction calcTestForceNoPBCKernel;
     CUfunction calcExcludeForceNoPBCKernel;
+    CUfunction calcExclusionPBCKernel;
+    CUfunction indexAtomKernel;
     OpenMM::CudaArray pairidx0, pairidx1;
     OpenMM::CudaArray expairidx0, expairidx1;
     OpenMM::CudaArray params;
