@@ -213,31 +213,32 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         };
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
 
-        void* argSwitch[] = {
-            &cu.getAtomIndexArray().getDevicePointer(),
-            &indexAtom.getDevicePointer(),
-            &numParticles
-        };
-        cu.executeKernel(indexAtomKernel, argSwitch, numParticles);
+        if (numexclusions > 0){
+            void* argSwitch[] = {
+                &cu.getAtomIndexArray().getDevicePointer(),
+                &indexAtom.getDevicePointer(),
+                &numParticles
+            };
+            cu.executeKernel(indexAtomKernel, argSwitch, numParticles);
 
-        void* argsEx[] = {
-            &cu.getForce().getDevicePointer(),            //   forceBuffers, 
-            &cu.getEnergyBuffer().getDevicePointer(),     //   energyBuffer, 
-            &cu.getPosq().getDevicePointer(),             //   posq, 
-            &params.getDevicePointer(),                   //   params,
-            &cu.getAtomIndexArray().getDevicePointer(),   //   atomIndex,
-            &indexAtom.getDevicePointer(),                //   indexAtom,
-            &expairidx0.getDevicePointer(),               //   exclusionidx1,
-            &expairidx1.getDevicePointer(),               //   exclusionidx2,
-            &numexclusions,                               //   numExclusions,
-            cu.getPeriodicBoxSizePointer(),               //   periodicBoxSize, 
-            cu.getInvPeriodicBoxSizePointer(),            //   invPeriodicBoxSize, 
-            cu.getPeriodicBoxVecXPointer(),               //   periodicBoxVecX, 
-            cu.getPeriodicBoxVecYPointer(),               //   periodicBoxVecY, 
-            cu.getPeriodicBoxVecZPointer()                //   periodicBoxVecZ
-        };
-        cu.executeKernel(calcExclusionPBCKernel, argsEx, numexclusions);
-
+            void* argsEx[] = {
+                &cu.getForce().getDevicePointer(),            //   forceBuffers, 
+                &cu.getEnergyBuffer().getDevicePointer(),     //   energyBuffer, 
+                &cu.getPosq().getDevicePointer(),             //   posq, 
+                &params.getDevicePointer(),                   //   params,
+                &cu.getAtomIndexArray().getDevicePointer(),   //   atomIndex,
+                &indexAtom.getDevicePointer(),                //   indexAtom,
+                &expairidx0.getDevicePointer(),               //   exclusionidx1,
+                &expairidx1.getDevicePointer(),               //   exclusionidx2,
+                &numexclusions,                               //   numExclusions,
+                cu.getPeriodicBoxSizePointer(),               //   periodicBoxSize, 
+                cu.getInvPeriodicBoxSizePointer(),            //   invPeriodicBoxSize, 
+                cu.getPeriodicBoxVecXPointer(),               //   periodicBoxVecX, 
+                cu.getPeriodicBoxVecYPointer(),               //   periodicBoxVecY, 
+                cu.getPeriodicBoxVecZPointer()                //   periodicBoxVecZ
+            };
+            cu.executeKernel(calcExclusionPBCKernel, argsEx, numexclusions);
+        }
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
         void* args[] = {
