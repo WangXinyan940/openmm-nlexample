@@ -216,7 +216,8 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
 
         void* argSwitch[] = {
             &cu.getAtomIndexArray().getDevicePointer(),
-            &indexAtom.getDevicePointer()
+            &indexAtom.getDevicePointer(),
+            &numParticles
         };
         cout << "2" << endl;
         cu.executeKernel(indexAtomKernel, argSwitch, numParticles);
