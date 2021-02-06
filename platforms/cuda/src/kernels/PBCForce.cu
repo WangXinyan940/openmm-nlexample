@@ -662,7 +662,7 @@ extern "C" __global__ void computeExclusion(
         real r = r2*invR;
         if (r < CUTOFF){
             energyBuffer[npair] -= prm1 * prm2 * invR * invR;
-            real dEdR = - 2.0 * atomData1.prm * atomData2.prm * invR * invR * invR * invR;
+            real dEdR = - 2.0 * prm1 * prm2 * invR * invR * invR * invR;
             delta *= dEdR;
             atomicAdd(&forceBuffers[atom1], static_cast<unsigned long long>((long long) (-delta.x*0x100000000)));
             atomicAdd(&forceBuffers[atom1+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-delta.y*0x100000000)));
