@@ -225,7 +225,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &cu.getPosq().getDevicePointer(),             //   posq, 
             &params.getDevicePointer(),                   //   params,
             &cu.getAtomIndexArray().getDevicePointer(),   //   atomIndex,
-            &indexAtom.getDevicePointer()                 //   indexAtom,
+            &indexAtom.getDevicePointer(),                //   indexAtom,
             &expairidx0.getDevicePointer(),               //   exclusionidx1,
             &expairidx1.getDevicePointer(),               //   exclusionidx2,
             &numexclusions,                               //   numExclusions,
