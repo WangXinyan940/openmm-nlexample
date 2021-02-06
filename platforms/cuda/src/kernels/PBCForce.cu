@@ -646,9 +646,6 @@ extern "C" __global__ void computeExclusion(
     real4                                      periodicBoxVecZ
 ){
     for (int npair = blockIdx.x*blockDim.x+threadIdx.x; npair < numExclusions; npair += blockDim.x*gridDim.x){
-        if (npair < 1){
-            printf("ComputeExclusion\n");
-        }
         int p1 = exclusionidx1[npair];
         int p2 = exclusionidx2[npair];
         int atom1 = indexAtom[p1];
