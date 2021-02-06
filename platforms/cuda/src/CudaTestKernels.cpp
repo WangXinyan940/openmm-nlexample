@@ -87,20 +87,24 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         params.upload(parameters);
     }
 
-    vector<int> exidx0, exidx1;
-    exidx0.resize(force.getNumExclusions());
-    exidx1.resize(force.getNumExclusions());
-    for(int ii=0;ii<force.getNumExclusions();ii++){
-        int p1, p2;
-        force.getExclusionParticles(ii, p1, p2);
-        exidx0[ii] = p1;
-        exidx1[ii] = p2;
+    numexclusions = force.getNumExclusions();
+    if (numexclusions > 0){
+        vector<int> exidx0, exidx1;
+        exidx0.resize(force.getNumExclusions());
+        exidx1.resize(force.getNumExclusions());
+        for(int ii=0;ii<force.getNumExclusions();ii++){
+            int p1, p2;
+            force.getExclusionParticles(ii, p1, p2);
+            exidx0[ii] = p1;
+            exidx1[ii] = p2;
+        }
+        expairidx0.initialize(cu, exidx0.size(), sizeof(int), "exindex0");
+        expairidx1.initialize(cu, exidx1.size(), sizeof(int), "exindex1");
+        expairidx0.upload(exidx0);
+        expairidx1.upload(exidx1);
     }
-    expairidx0.initialize(cu, exidx0.size(), sizeof(int), "exindex0");
-    expairidx1.initialize(cu, exidx1.size(), sizeof(int), "exindex1");
-    expairidx0.upload(exidx0);
-    expairidx1.upload(exidx1);
-    numexclusions = exidx0.size();
+
+
 
     if (!ifPBC){
         map<string, string> defines;
@@ -253,19 +257,21 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         };
         cu.executeKernel(calcTestForceNoPBCKernel, args, numParticles*(numParticles-1)/2);
 
-        void* args2[] = {
-            &cu.getEnergyBuffer().getDevicePointer(), 
-            &cu.getPosq().getDevicePointer(), 
-            &cu.getForce().getDevicePointer(), 
-            &params.getDevicePointer(), 
-            &cu.getAtomIndexArray().getDevicePointer(),
-            &expairidx0.getDevicePointer(), 
-            &expairidx1.getDevicePointer(), 
-            &numexclusions, 
-            &numParticles, 
-            &paddedNumAtoms
-        };
-        cu.executeKernel(calcExcludeForceNoPBCKernel, args2, numexclusions);
+        if (numexclusions > 0){
+            void* args2[] = {
+                &cu.getEnergyBuffer().getDevicePointer(), 
+                &cu.getPosq().getDevicePointer(), 
+                &cu.getForce().getDevicePointer(), 
+                &params.getDevicePointer(), 
+                &cu.getAtomIndexArray().getDevicePointer(),
+                &expairidx0.getDevicePointer(), 
+                &expairidx1.getDevicePointer(), 
+                &numexclusions, 
+                &numParticles, 
+                &paddedNumAtoms
+            };
+            cu.executeKernel(calcExcludeForceNoPBCKernel, args2, numexclusions);
+        }
     }
     return energy;
 }
