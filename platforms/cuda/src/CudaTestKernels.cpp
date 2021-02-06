@@ -217,7 +217,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &cu.getAtomIndexArray().getDevicePointer(),
             &indexAtom.getDevicePointer()
         };
-        cu.executeKernel(indexAtomKernel, argSwitchm numParticles);
+        cu.executeKernel(indexAtomKernel, argSwitch, numParticles);
 
         void* argsEx[] = {
             &cu.getForce().getDevicePointer(),            //   forceBuffers, 
@@ -235,7 +235,7 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             cu.getPeriodicBoxVecYPointer(),               //   periodicBoxVecY, 
             cu.getPeriodicBoxVecZPointer()                //   periodicBoxVecZ
         };
-        cu.executeKernel(calcExclusionPBCKernel, argsEx, numExclusions);
+        cu.executeKernel(calcExclusionPBCKernel, argsEx, numexclusions);
 
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();
