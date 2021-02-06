@@ -211,7 +211,6 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &maxSinglePairs,                                        // unsigned int                               maxSinglePairs,
             &nb.getSinglePairs().getDevicePointer()                // const int2*               __restrict__     singlePairs
         };
-        cout << "1" << endl;
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
 
         void* argSwitch[] = {
@@ -219,7 +218,6 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &indexAtom.getDevicePointer(),
             &numParticles
         };
-        cout << "2" << endl;
         cu.executeKernel(indexAtomKernel, argSwitch, numParticles);
 
         void* argsEx[] = {
@@ -238,7 +236,6 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             cu.getPeriodicBoxVecYPointer(),               //   periodicBoxVecY, 
             cu.getPeriodicBoxVecZPointer()                //   periodicBoxVecZ
         };
-        cout << "3" << endl;
         cu.executeKernel(calcExclusionPBCKernel, argsEx, numexclusions);
 
     } else {
