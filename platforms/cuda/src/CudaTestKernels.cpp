@@ -87,6 +87,21 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         params.upload(parameters);
     }
 
+    vector<int> exidx0, exidx1;
+    exidx0.resize(force.getNumExclusions());
+    exidx1.resize(force.getNumExclusions());
+    for(int ii=0;ii<force.getNumExclusions();ii++){
+        int p1, p2;
+        force.getExclusionParticles(ii, p1, p2);
+        exidx0[ii] = p1;
+        exidx1[ii] = p2;
+    }
+    expairidx0.initialize(cu, exidx0.size(), sizeof(int), "exindex0");
+    expairidx1.initialize(cu, exidx1.size(), sizeof(int), "exindex1");
+    expairidx0.upload(exidx0);
+    expairidx1.upload(exidx1);
+    numexclusions = exidx0.size();
+
     if (!ifPBC){
         map<string, string> defines;
         CUmodule module = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::noPBCForce, defines);
@@ -109,21 +124,6 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pairidx0.upload(idx0);
         pairidx1.upload(idx1);
 
-        vector<int> exidx0, exidx1;
-        exidx0.resize(force.getNumExclusions());
-        exidx1.resize(force.getNumExclusions());
-        for(int ii=0;ii<force.getNumExclusions();ii++){
-            int p1, p2;
-            force.getExclusionParticles(ii, p1, p2);
-            exidx0[ii] = p1;
-            exidx1[ii] = p2;
-        }
-        expairidx0.initialize(cu, exidx0.size(), sizeof(int), "exindex0");
-        expairidx1.initialize(cu, exidx1.size(), sizeof(int), "exindex1");
-        expairidx0.upload(exidx0);
-        expairidx1.upload(exidx1);
-        numexclusions = exidx0.size();
-
     } else {
 
         cu.getNonbondedUtilities().addInteraction(true, true, true, cutoff, exclusions, "", force.getForceGroup());
@@ -137,6 +137,11 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
             }
         }
 
+        vector<int> indexAtomVec;
+        indexAtomVec.resize(numParticles);
+        indexAtom.initialize(cu, numParticles, sizeof(int), "indexAtom");
+        indexAtom.upload(indexAtomVec);
+
         map<string, string> pbcDefines;
         pbcDefines["NUM_ATOMS"] = cu.intToString(numParticles);
         pbcDefines["PADDED_NUM_ATOMS"] = cu.intToString(cu.getPaddedNumAtoms());
@@ -144,17 +149,13 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         pbcDefines["THREAD_BLOCK_SIZE"] = cu.intToString(cu.getNonbondedUtilities().getForceThreadBlockSize());
 
         pbcDefines["TILE_SIZE"] = cu.intToString(CudaContext::TileSize);
-        cout << "TILE_SIZE " << pbcDefines["TILE_SIZE"] << endl;
         int numExclusionTiles = tilesWithExclusions.size();
         pbcDefines["NUM_TILES_WITH_EXCLUSIONS"] = cu.intToString(numExclusionTiles);
-        cout << "NUM_TILES_WITH_EXCLUSIONS " << pbcDefines["NUM_TILES_WITH_EXCLUSIONS"] << endl;
         int numContexts = cu.getPlatformData().contexts.size();
         int startExclusionIndex = cu.getContextIndex()*numExclusionTiles/numContexts;
         int endExclusionIndex = (cu.getContextIndex()+1)*numExclusionTiles/numContexts;
         pbcDefines["FIRST_EXCLUSION_TILE"] = cu.intToString(startExclusionIndex);
-        cout << "FIRST_EXCLUSION_TILE " << pbcDefines["FIRST_EXCLUSION_TILE"] << endl;
         pbcDefines["LAST_EXCLUSION_TILE"] = cu.intToString(endExclusionIndex);
-        cout << "LAST_EXCLUSION_TILE " << pbcDefines["LAST_EXCLUSION_TILE"] << endl;
         pbcDefines["USE_PERIODIC"] = "1";
         pbcDefines["USE_CUTOFF"] = "1";
         pbcDefines["USE_EXCLUSIONS"] = "";
@@ -168,6 +169,8 @@ void CudaCalcTestForceKernel::initialize(const System& system, const TestForce& 
         // calcTestForcePBCKernel = cu.getKernel(PBCModule, "calcTestForcePBC");
         CUmodule PBCModule = cu.createModule(CudaKernelSources::vectorOps + CudaTestKernelSources::PBCForce, pbcDefines);
         calcTestForcePBCKernel = cu.getKernel(PBCModule, "computeNonbonded");
+        calcExclusionPBCKernel = cu.getKernel(PBCModule, "computeExclusion");
+        indexAtomKernel = cu.getKernel(PBCModule, "genIndexAtom");
     }
     cu.addForce(new CudaCalcTestForceInfo(force));
     hasInitializedKernel = true;
@@ -183,48 +186,6 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
         int numTileIndices = nb.getNumTiles();
         unsigned int maxTiles = nb.getInteractingTiles().getSize();
         int maxSinglePairs = nb.getSinglePairs().getSize();
-        cout << "startTileIndex " << startTileIndex << endl;
-        cout << "numTileIndices " << numTileIndices << endl;
-        cout << "maxTiles " << maxTiles << endl;
-        cout << "maxSinglePairs " << maxSinglePairs << endl;
-        cout << "ex size " << nb.getExclusions().getSize() << endl;
-
-        // vector<tileflags> exVec;
-        // exVec.resize(nb.getExclusionTiles().getSize());
-        // nb.getExclusions().download(exVec);
-        // cout << "Ex Vec:" << endl;
-        // for(int ii=0;ii<exVec.size();ii++){
-        //     cout << exVec[ii] << " ";
-        // }
-        // cout << endl;
-
-        // void* args[] = {
-        //     &cu.getForce().getDevicePointer(),                      // forceBuffers    
-        //     &cu.getEnergyBuffer().getDevicePointer(),               // energyBuffer           
-        //     &cu.getPosq().getDevicePointer(),                       // posq   
-        //     &cu.getAtomIndexArray().getDevicePointer(),             // atomIndex
-        //     &nb.getExclusions().getDevicePointer(),                 // exclusion
-        //     &nb.getExclusionTiles().getDevicePointer(),             // exclusionTiles
-        //     &startTileIndex,                                        // startTileIndex
-        //     &numTileIndices,                                        // numTileIndices
-        //     &nb.getInteractingTiles().getDevicePointer(),           // tiles  
-        //     &nb.getInteractionCount().getDevicePointer(),           // interactionCount  
-        //     cu.getPeriodicBoxSizePointer(),                         // periodicBoxSize 
-        //     cu.getInvPeriodicBoxSizePointer(),                      // invPeriodicBoxSize    
-        //     cu.getPeriodicBoxVecXPointer(),                         // periodicBoxVecX 
-        //     cu.getPeriodicBoxVecYPointer(),                         // periodicBoxVecY 
-        //     cu.getPeriodicBoxVecZPointer(),                         // periodicBoxVecZ 
-        //     &maxTiles,                                              // maxTiles
-        //     &nb.getBlockCenters().getDevicePointer(),               // blockCente
-        //     &nb.getBlockBoundingBoxes().getDevicePointer(),         // blockSize  
-        //     &nb.getInteractingAtoms().getDevicePointer(),           // interactingAtoms  
-        //     &maxSinglePairs,                                        // maxSinglePair
-        //     &nb.getSinglePairs().getDevicePointer(),                // singlePai
-        //     &params.getDevicePointer(),                             // params
-        //     &cutoff                                                 // cutoff
-        // };
-        // cout << nb.getNumForceThreadBlocks() << " | " << nb.getForceThreadBlockSize() << endl;
-        // cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
 
         void* args[] = {
             &cu.getForce().getDevicePointer(),                      // unsigned long long*       __restrict__     forceBuffers, 
@@ -251,6 +212,30 @@ double CudaCalcTestForceKernel::execute(ContextImpl& context, bool includeForces
             &nb.getSinglePairs().getDevicePointer()                // const int2*               __restrict__     singlePairs
         };
         cu.executeKernel(calcTestForcePBCKernel, args, nb.getNumForceThreadBlocks()*nb.getForceThreadBlockSize(), nb.getForceThreadBlockSize());
+
+        void* argSwitch[] = {
+            &cu.getAtomIndexArray().getDevicePointer(),
+            &indexAtom.getDevicePointer()
+        };
+        cu.executeKernel(indexAtomKernel, argSwitchm numParticles);
+
+        void* argsEx[] = {
+            &cu.getForce().getDevicePointer(),            //   forceBuffers, 
+            &cu.getEnergyBuffer().getDevicePointer(),     //   energyBuffer, 
+            &cu.getPosq().getDevicePointer(),             //   posq, 
+            &params.getDevicePointer(),                   //   params,
+            &cu.getAtomIndexArray().getDevicePointer(),   //   atomIndex,
+            &indexAtom.getDevicePointer()                 //   indexAtom,
+            &expairidx0.getDevicePointer(),               //   exclusionidx1,
+            &expairidx1.getDevicePointer(),               //   exclusionidx2,
+            &numexclusions,                               //   numExclusions,
+            cu.getPeriodicBoxSizePointer(),               //   periodicBoxSize, 
+            cu.getInvPeriodicBoxSizePointer(),            //   invPeriodicBoxSize, 
+            cu.getPeriodicBoxVecXPointer(),               //   periodicBoxVecX, 
+            cu.getPeriodicBoxVecYPointer(),               //   periodicBoxVecY, 
+            cu.getPeriodicBoxVecZPointer()                //   periodicBoxVecZ
+        };
+        cu.executeKernel(calcExclusionPBCKernel, argsEx, numExclusions);
 
     } else {
         int paddedNumAtoms = cu.getPaddedNumAtoms();

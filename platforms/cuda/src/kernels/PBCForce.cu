@@ -628,3 +628,60 @@ extern "C" __global__ void computeNonbonded(
     energyBuffer[blockIdx.x*blockDim.x+threadIdx.x] += energy;
 #endif
 }
+
+extern "C" __global__ void computeExclusion(
+    unsigned long long*       __restrict__     forceBuffers, 
+    mixed*                    __restrict__     energyBuffer, 
+    const real4*              __restrict__     posq, 
+    const real*               __restrict__     params,
+    const int*                __restrict__     atomIndex,
+    const int*                __restrict__     indexAtom,
+    const int*                __restrict__     exclusionidx1,
+    const int*                __restrict__     exclusionidx2,
+    const int                                  numExclusions,
+    real4                                      periodicBoxSize, 
+    real4                                      invPeriodicBoxSize, 
+    real4                                      periodicBoxVecX, 
+    real4                                      periodicBoxVecY, 
+    real4                                      periodicBoxVecZ
+){
+    for (int npair = blockIdx.x*blockDim.x+threadIdx.x; npair < numExclusions; npair += blockDim.x*gridDim.x){
+        int p1 = exclusionidx1[npair];
+        int p2 = exclusionidx2[npair];
+        int atom1 = indexAtom[p1];
+        int atom2 = indexAtom[p2];
+        real prm1 = params[p1];
+        real prm2 = params[p2];
+        real4 posq1 = posq[atom1];
+        real4 posq2 = posq[atom2];
+        real3 delta = make_real3(posq2.x - posq1.x, posq2.y - posq1.y, posq2.z - posq1.z);
+        APPLY_PERIODIC_TO_DELTA(delta)
+        
+        real r2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
+        real invR = RSQRT(r2);
+        real r = r2*invR;
+        if (r < CUTOFF){
+            energyBuffer[npair] -= prm1 * prm2 * invR * invR;
+            real dEdR = - 2.0 * atomData1.prm * atomData2.prm * invR * invR * invR * invR;
+            delta *= dEdR;
+            atomicAdd(&forceBuffers[atom1], static_cast<unsigned long long>((long long) (-delta.x*0x100000000)));
+            atomicAdd(&forceBuffers[atom1+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-delta.y*0x100000000)));
+            atomicAdd(&forceBuffers[atom1+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (-delta.z*0x100000000)));
+            atomicAdd(&forceBuffers[atom2], static_cast<unsigned long long>((long long) (delta.x*0x100000000)));
+            atomicAdd(&forceBuffers[atom2+PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (delta.y*0x100000000)));
+            atomicAdd(&forceBuffers[atom2+2*PADDED_NUM_ATOMS], static_cast<unsigned long long>((long long) (delta.z*0x100000000)));
+        }
+
+    }
+}
+
+extern "C" __global__ void genIndexAtom(
+    const int*     __restrict__    atomIndex,
+    int*           __restrict__    indexAtom,
+    int                            numParticles
+){
+    for (int atom = blockIdx.x*blockDim.x+threadIdx.x; atom < numParticles; atom += blockDim.x*gridDim.x){
+        int index = atomIndex[atom];
+        indexAtom[index] = atom;
+    }
+}

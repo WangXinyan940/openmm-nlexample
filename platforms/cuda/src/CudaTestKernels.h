@@ -44,6 +44,7 @@ private:
     OpenMM::CudaArray pairidx0, pairidx1;
     OpenMM::CudaArray expairidx0, expairidx1;
     OpenMM::CudaArray params;
+    OpenMM::CudaArray indexAtom;
     std::vector<std::vector<int>> exclusions;
     int numexclusions;
     double cutoff;
